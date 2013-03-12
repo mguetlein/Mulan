@@ -22,6 +22,7 @@ package mulan.evaluation;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import mulan.data.MultiLabelInstances;
 import mulan.evaluation.measure.MacroAverageMeasure;
 import mulan.evaluation.measure.Measure;
@@ -36,75 +37,89 @@ import mulan.evaluation.measure.Measure;
  * @author Grigorios Tsoumakas
  * @version 2010.11.05
  */
-public class Evaluation {
+public class Evaluation
+{
 
-    private MultiLabelInstances data;
-    private List<Measure> measures;
+	private MultiLabelInstances data;
+	private List<Measure> measures;
 
-    /**
-     * Creates a new evaluation object by deep copying the measure objects that
-     * are given as parameters
-     *
-     * @param someMeasures calculated measures
-     * @param data the evaluation data used for obtaining label names for per
-     * outputting per label values of macro average measures
-     * @throws Exception
-     */
-    public Evaluation(List<Measure> someMeasures, MultiLabelInstances data) throws Exception {
-        measures = new ArrayList<Measure>();
-        for (Measure m : someMeasures) {
-            Measure newMeasure = m.makeCopy();
-            measures.add(newMeasure);
-        }
-        this.data = data;
-    }
+	/**
+	 * Creates a new evaluation object by deep copying the measure objects that
+	 * are given as parameters
+	 *
+	 * @param someMeasures calculated measures
+	 * @param data the evaluation data used for obtaining label names for per
+	 * outputting per label values of macro average measures
+	 * @throws Exception
+	 */
+	public Evaluation(List<Measure> someMeasures, MultiLabelInstances data) throws Exception
+	{
+		measures = new ArrayList<Measure>();
+		for (Measure m : someMeasures)
+		{
+			Measure newMeasure = m.makeCopy();
+			measures.add(newMeasure);
+		}
+		this.data = data;
+	}
 
-    /**
-     * Returns a string with the results of the evaluation
-     * 
-     * @return a string with the results of the evaluation
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (Measure m : measures) {
-            sb.append(m);
-            if (m instanceof MacroAverageMeasure) {
-                sb.append("\n");
-                for (int i=0; i<data.getNumLabels(); i++) {
-                    sb.append(data.getDataSet().attribute(data.getLabelIndices()[i]).name()).append(": ").append(((MacroAverageMeasure) m).getValue(i)).append(" ");
-                }
-            }
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
+	/**
+	 * Returns a string with the results of the evaluation
+	 * 
+	 * @return a string with the results of the evaluation
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (Measure m : measures)
+		{
+			sb.append(m);
+			if (m instanceof MacroAverageMeasure)
+			{
+				sb.append("\n");
+				for (int i = 0; i < data.getNumLabels(); i++)
+				{
+					sb.append(data.getDataSet().attribute(data.getLabelIndices()[i]).name()).append(": ")
+							.append(((MacroAverageMeasure) m).getValue(i)).append(" ");
+				}
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 
-    /**
-     * Returns a CSV representation of the calculated measures
-     *
-     * @return the CSV representation of the calculated measures
-     */
-    public String toCSV() {
-        StringBuilder sb = new StringBuilder();
-        for (Measure m : measures) {
-            double value = Double.NaN;
-            try {
-                value = m.getValue();
-            } catch (Exception ex) {
-            }
-            sb.append(String.format("%.4f", value));
-            sb.append(";");
-        }
-        return sb.toString();
-    }
+	/**
+	 * Returns a CSV representation of the calculated measures
+	 *
+	 * @return the CSV representation of the calculated measures
+	 */
+	public String toCSV()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (Measure m : measures)
+		{
+			double value = Double.NaN;
+			try
+			{
+				value = m.getValue();
+			}
+			catch (Exception ex)
+			{
+			}
+			sb.append(String.format("%.4f", value));
+			sb.append(";");
+		}
+		return sb.toString();
+	}
 
-    /**
-     * Returns the evaluation measures
-     *
-     * @return the evaluation measures
-     */
-    public List<Measure> getMeasures() {
-        return measures;
-    }
+	/**
+	 * Returns the evaluation measures
+	 *
+	 * @return the evaluation measures
+	 */
+	public List<Measure> getMeasures()
+	{
+		return measures;
+	}
 }
