@@ -243,6 +243,38 @@ public class MultipleEvaluation
 		return mean.get(measureName);
 	}
 
+	public double getLabelMean(String measureName, int label)
+	{
+		return labelMean.get(measureName)[label];
+	}
+
+	public MultiLabelInstances getData(int experiment)
+	{
+		return evaluations.get(experiment).getData();
+	}
+
+	public double getResult(String measureName, int experiment)
+	{
+		Evaluation e = evaluations.get(experiment);
+		for (Measure measure : e.getMeasures())
+			if (measure.getName().equals(measureName))
+				return measure.getValue();
+		throw new IllegalStateException("measure not found");
+	}
+
+	public double getResult(String measureName, int experiment, int label)
+	{
+		Evaluation e = evaluations.get(experiment);
+		for (Measure measure : e.getMeasures())
+			if (measure.getName().equals(measureName))
+			{
+				if (!(measure instanceof MacroAverageMeasure))
+					throw new IllegalStateException("not a macro measure");
+				return ((MacroAverageMeasure) measure).getValue(label);
+			}
+		throw new IllegalStateException("measure not found");
+	}
+
 	/**
 	 * Returns a CSV string representation of the results
 	 *

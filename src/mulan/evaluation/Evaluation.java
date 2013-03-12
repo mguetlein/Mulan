@@ -113,6 +113,11 @@ public class Evaluation
 		return sb.toString();
 	}
 
+	public MultiLabelInstances getData()
+	{
+		return data;
+	}
+
 	/**
 	 * Returns the evaluation measures
 	 *
