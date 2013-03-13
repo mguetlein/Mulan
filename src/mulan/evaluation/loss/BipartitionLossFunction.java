@@ -26,14 +26,17 @@ package mulan.evaluation.loss;
  * @author Grigorios Tsoumakas
  * @version 2010.12.01
  */
-public interface BipartitionLossFunction extends MultiLabelLossFunction {
+public interface BipartitionLossFunction extends MultiLabelLossFunction
+{
 
-    /**
-     * Computes the bipartition loss function
-     *
-     * @param bipartition the biprtition of the learner for an example
-     * @param groundTruth the ground truth of the example
-     * @return the value of the loss function
-     */
-    public double computeLoss(boolean[] bipartition, boolean[] groundTruth);
+	/**
+	 * Computes the bipartition loss function
+	 *
+	 * @param bipartition the biprtition of the learner for an example
+	 * @param groundTruth the ground truth of the example
+	 * @return the value of the loss function
+	 */
+	public double computeLoss(boolean[] bipartition, boolean[] groundTruth);
+
+	public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing);
 }

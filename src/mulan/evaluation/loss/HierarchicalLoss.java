@@ -23,6 +23,7 @@ package mulan.evaluation.loss;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import mulan.data.LabelNode;
 import mulan.data.LabelsMetaData;
 import mulan.data.MultiLabelInstances;
@@ -34,58 +35,73 @@ import mulan.data.MultiLabelInstances;
  * @author Grigorios Tsoumakas
  * @version 2010.12.10
  */
-public class HierarchicalLoss extends BipartitionLossFunctionBase {
-    private LabelsMetaData metaData;
-    private Map<String, Integer> labelPosition;
-    private double loss;
+public class HierarchicalLoss extends BipartitionLossFunctionBase
+{
+	private LabelsMetaData metaData;
+	private Map<String, Integer> labelPosition;
+	private double loss;
 
-    /**
-     * Creates a new instance of this class
-     *
-     * @param data the training data
-     */
-    public HierarchicalLoss(MultiLabelInstances data) {
-        metaData = data.getLabelsMetaData();
+	/**
+	 * Creates a new instance of this class
+	 *
+	 * @param data the training data
+	 */
+	public HierarchicalLoss(MultiLabelInstances data)
+	{
+		metaData = data.getLabelsMetaData();
 
-        // calculate the position of labels inside a bipartition
-        labelPosition = new HashMap<String, Integer>();
-        int[] indices = data.getLabelIndices();
-        int counter = 0;
-        for (int i : indices) {
-            labelPosition.put(data.getDataSet().attribute(i).name(), counter);
-            counter++;
-        }
-    }
+		// calculate the position of labels inside a bipartition
+		labelPosition = new HashMap<String, Integer>();
+		int[] indices = data.getLabelIndices();
+		int counter = 0;
+		for (int i : indices)
+		{
+			labelPosition.put(data.getDataSet().attribute(i).name(), counter);
+			counter++;
+		}
+	}
 
-    @Override
-    public String getName() {
-        return "Hierarchical Loss";
-    }
+	@Override
+	public String getName()
+	{
+		return "Hierarchical Loss";
+	}
 
-    @Override
-    public double computeLoss(boolean[] bipartition, boolean[] truth) {
-        loss = 0;
-        calculateHLoss(bipartition, truth, metaData.getRootLabels());
-        return loss;
-    }
+	@Override
+	public double computeLoss(boolean[] bipartition, boolean[] truth)
+	{
+		loss = 0;
+		calculateHLoss(bipartition, truth, metaData.getRootLabels());
+		return loss;
+	}
 
-    /**
-     * Recursively calculates the hierarchical loss
-     *
-     * @param bipartition the bipartition
-     * @param truth the ground truth
-     * @param children the children of the current node
-     */
-    private void calculateHLoss(boolean[] bipartition, boolean[] truth, Set<LabelNode> children) {
-        for (LabelNode child : children) {
-            int labelPos = labelPosition.get(child.getName());
-            if (bipartition[labelPos] == truth[labelPos]) {
-                calculateHLoss(bipartition, truth, child.getChildren());
-            } else {
-                loss += 1;
-            }
-        }
-    }
+	@Override
+	public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing)
+	{
+		throw new Error("not implemented, overwrite if required for " + this.getClass());
+	}
 
+	/**
+	 * Recursively calculates the hierarchical loss
+	 *
+	 * @param bipartition the bipartition
+	 * @param truth the ground truth
+	 * @param children the children of the current node
+	 */
+	private void calculateHLoss(boolean[] bipartition, boolean[] truth, Set<LabelNode> children)
+	{
+		for (LabelNode child : children)
+		{
+			int labelPos = labelPosition.get(child.getName());
+			if (bipartition[labelPos] == truth[labelPos])
+			{
+				calculateHLoss(bipartition, truth, child.getChildren());
+			}
+			else
+			{
+				loss += 1;
+			}
+		}
+	}
 
 }

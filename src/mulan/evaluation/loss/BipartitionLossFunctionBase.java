@@ -21,6 +21,7 @@
 package mulan.evaluation.loss;
 
 import java.io.Serializable;
+
 import mulan.classifier.MultiLabelOutput;
 import mulan.core.ArgumentNullException;
 
@@ -30,27 +31,43 @@ import mulan.core.ArgumentNullException;
  * @author GrigoriosTsoumakas
  * @version 2010.11.10
  */
-public abstract class BipartitionLossFunctionBase implements BipartitionLossFunction, Serializable  {
+public abstract class BipartitionLossFunctionBase implements BipartitionLossFunction, Serializable
+{
 
-    private void checkBipartition(boolean[] bipartition) {
-        if (bipartition == null) {
-            throw new ArgumentNullException("Bipartition is null");
-        }
-    }
+	private void checkBipartition(boolean[] bipartition)
+	{
+		if (bipartition == null)
+		{
+			throw new ArgumentNullException("Bipartition is null");
+		}
+	}
 
-    private void checkLength(boolean[] bipartition, boolean[] groundTruth) {
-        if (bipartition.length != groundTruth.length) {
-            throw new IllegalArgumentException("The dimensions of the " +
-                    "bipartition and the ground truth array do not match");
-        }
-    }
+	private void checkLength(boolean[] bipartition, boolean[] groundTruth)
+	{
+		if (bipartition.length != groundTruth.length)
+		{
+			throw new IllegalArgumentException("The dimensions of the "
+					+ "bipartition and the ground truth array do not match");
+		}
+	}
 
-    public final double computeLoss(MultiLabelOutput prediction, boolean[] groundTruth) {
-        boolean[] bipartition = prediction.getBipartition();
-        checkBipartition(bipartition);
-        checkLength(bipartition, groundTruth);
-        return computeLoss(bipartition, groundTruth);
-    }
+	public final double computeLoss(MultiLabelOutput prediction, boolean[] groundTruth)
+	{
+		boolean[] bipartition = prediction.getBipartition();
+		checkBipartition(bipartition);
+		checkLength(bipartition, groundTruth);
+		return computeLoss(bipartition, groundTruth);
+	}
 
-    abstract public double computeLoss(boolean[] bipartition, boolean[] groundTruth);
+	public final double computeLoss(MultiLabelOutput prediction, boolean[] groundTruth, boolean[] isMissing)
+	{
+		boolean[] bipartition = prediction.getBipartition();
+		checkBipartition(bipartition);
+		checkLength(bipartition, groundTruth);
+		return computeLoss(bipartition, groundTruth, isMissing);
+	}
+
+	abstract public double computeLoss(boolean[] bipartition, boolean[] groundTruth);
+
+	abstract public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing);
 }

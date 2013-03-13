@@ -27,28 +27,57 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2010.11.05
  */
-public class SubsetAccuracy extends ExampleBasedBipartitionMeasureBase {
+public class SubsetAccuracy extends ExampleBasedBipartitionMeasureBase
+{
 
-    public String getName() {
-        return "Subset Accuracy";
-    }
+	public String getName()
+	{
+		return "Subset Accuracy";
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
+	public double getIdealValue()
+	{
+		return 1;
+	}
 
-    @Override
-    protected void updateBipartition(boolean[] bipartition, boolean[] truth) {
-        double value = 1;
-        for (int i = 0; i < truth.length; i++) {
-            if (bipartition[i] != truth[i]) {
-                value = 0;
-                break;
-            }
-        }
+	@Override
+	protected void updateBipartition(boolean[] bipartition, boolean[] truth)
+	{
+		double value = 1;
+		for (int i = 0; i < truth.length; i++)
+		{
+			if (bipartition[i] != truth[i])
+			{
+				value = 0;
+				break;
+			}
+		}
+		sum += value;
+		count++;
+	}
 
-        sum += value;
-        count++;
-    }
+	@Override
+	protected void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] isMissing)
+	{
+		double value = 1;
+		boolean allMissing = true;
+		for (int i = 0; i < truth.length; i++)
+		{
+			if (!isMissing[i])
+			{
+				allMissing = false;
+				if (bipartition[i] != truth[i])
+				{
+					value = 0;
+					break;
+				}
+			}
+		}
+		if (!allMissing)
+		{
+			sum += value;
+			count++;
+		}
+	}
 
 }

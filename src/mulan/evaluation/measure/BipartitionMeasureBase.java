@@ -28,26 +28,53 @@ import mulan.core.ArgumentNullException;
  * @author Grigorios Tsoumakas
  * @version 2010.11.01
  */
-public abstract class BipartitionMeasureBase extends MeasureBase {
+public abstract class BipartitionMeasureBase extends MeasureBase
+{
 
-    protected void updateInternal(MultiLabelOutput prediction, boolean[] truth) {
-        boolean[] bipartition = prediction.getBipartition();
-        if (bipartition == null) {
-            throw new ArgumentNullException("Bipartition is null");
-        }
-        if (bipartition.length != truth.length) {
-            throw new IllegalArgumentException("The dimensions of the " +
-                    "bipartition and the ground truth array do not match");
-        }
-        updateBipartition(bipartition, truth);
-    }
+	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth)
+	{
+		boolean[] bipartition = prediction.getBipartition();
+		if (bipartition == null)
+		{
+			throw new ArgumentNullException("Bipartition is null");
+		}
+		if (bipartition.length != truth.length)
+		{
+			throw new IllegalArgumentException("The dimensions of the "
+					+ "bipartition and the ground truth array do not match");
+		}
+		updateBipartition(bipartition, truth);
+	}
 
-    /**
-     * Updates the measure based on an example
-     *
-     * @param bipartition the predicted bipartition
-     * @param truth the ground truth
-     */
-    protected abstract void updateBipartition(boolean[] bipartition, boolean[] truth);
+	@Override
+	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	{
+		boolean[] bipartition = prediction.getBipartition();
+		if (bipartition == null)
+		{
+			throw new ArgumentNullException("Bipartition is null");
+		}
+		if (bipartition.length != truth.length)
+		{
+			throw new IllegalArgumentException("The dimensions of the "
+					+ "bipartition and the ground truth array do not match");
+		}
+		if (missingTruth.length != truth.length)
+			throw new IllegalArgumentException();
+		updateBipartition(bipartition, truth, missingTruth);
+	}
+
+	/**
+	 * Updates the measure based on an example
+	 *
+	 * @param bipartition the predicted bipartition
+	 * @param truth the ground truth
+	 */
+	protected abstract void updateBipartition(boolean[] bipartition, boolean[] truth);
+
+	protected void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] missingTruth)
+	{
+		throw new Error("not implemented, overwrite if required for " + this.getClass());
+	}
 
 }

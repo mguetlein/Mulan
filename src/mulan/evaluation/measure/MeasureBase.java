@@ -21,6 +21,7 @@
 package mulan.evaluation.measure;
 
 import java.io.Serializable;
+
 import mulan.classifier.MultiLabelOutput;
 import mulan.core.ArgumentNullException;
 import weka.core.SerializedObject;
@@ -29,42 +30,66 @@ import weka.core.SerializedObject;
  * 
  * @author Grigorios Tsoumakas
  */
-public abstract class MeasureBase implements Measure, Serializable {
+public abstract class MeasureBase implements Measure, Serializable
+{
 
-    public final void update(MultiLabelOutput prediction, boolean[] truth) {
-        if (prediction == null) {
-            throw new ArgumentNullException("Prediction is null");
-        }
-        if (truth == null) {
-            throw new ArgumentNullException("Ground truth is null");
-        }
-        updateInternal(prediction, truth);
-    }
+	public final void update(MultiLabelOutput prediction, boolean[] truth)
+	{
+		if (prediction == null)
+		{
+			throw new ArgumentNullException("Prediction is null");
+		}
+		if (truth == null)
+		{
+			throw new ArgumentNullException("Ground truth is null");
+		}
+		updateInternal(prediction, truth);
+	}
 
-    /**
-     * Returns a string with the value of a measure
-     *
-     * @return string representation of the value of a measure
-     */
-    @Override
-    public String toString() {
-        double value = Double.NaN;
-        try {
-            value = getValue();
-        } catch (Exception ex) {
-        } 
-        return getName() + ": " + String.format("%.4f", value);
-    }
+	public final void update(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	{
+		if (prediction == null)
+		{
+			throw new ArgumentNullException("Prediction is null");
+		}
+		if (truth == null)
+		{
+			throw new ArgumentNullException("Ground truth is null");
+		}
+		updateInternal(prediction, truth, missingTruth);
+	}
 
-    /**
-     * Updates the measure based on an example
-     *
-     * @param prediction the output of the algorithm for the example
-     * @param truth the ground truth of the example
-     */
-    protected abstract void updateInternal(MultiLabelOutput prediction, boolean[] truth);
+	/**
+	 * Returns a string with the value of a measure
+	 *
+	 * @return string representation of the value of a measure
+	 */
+	@Override
+	public String toString()
+	{
+		double value = Double.NaN;
+		try
+		{
+			value = getValue();
+		}
+		catch (Exception ex)
+		{
+		}
+		return getName() + ": " + String.format("%.4f", value);
+	}
 
-    public Measure makeCopy() throws Exception {
-        return (Measure) new SerializedObject(this).getObject();
-    }
+	/**
+	 * Updates the measure based on an example
+	 *
+	 * @param prediction the output of the algorithm for the example
+	 * @param truth the ground truth of the example
+	 */
+	protected abstract void updateInternal(MultiLabelOutput prediction, boolean[] truth);
+
+	protected abstract void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth);
+
+	public Measure makeCopy() throws Exception
+	{
+		return (Measure) new SerializedObject(this).getObject();
+	}
 }

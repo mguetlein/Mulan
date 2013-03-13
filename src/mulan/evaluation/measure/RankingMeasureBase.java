@@ -28,43 +28,55 @@ import mulan.core.ArgumentNullException;
  * @author Grigorios Tsoumakas
  * @version 2010.12.03
  */
-public abstract class RankingMeasureBase extends MeasureBase {
-    /**
-     * The current sum of the measure
-     */
-    protected double sum;
-    /**
-     * The number of validation examples processed
-     */
-    protected int count;
+public abstract class RankingMeasureBase extends MeasureBase
+{
+	/**
+	 * The current sum of the measure
+	 */
+	protected double sum;
+	/**
+	 * The number of validation examples processed
+	 */
+	protected int count;
 
-    public void reset() {
-        sum = 0;
-        count = 0;
-    }
+	public void reset()
+	{
+		sum = 0;
+		count = 0;
+	}
 
-    public double getValue() {
-        return sum / count;
-    }
+	public double getValue()
+	{
+		return sum / count;
+	}
 
-    protected void updateInternal(MultiLabelOutput prediction, boolean[] truth) {
-        int[] ranking = prediction.getRanking();
-        if (ranking == null) {
-            throw new ArgumentNullException("Bipartition is null");
-        }
-        if (ranking.length != truth.length) {
-            throw new IllegalArgumentException("The dimensions of the " +
-                    "bipartition and the ground truth array do not match");
-        }
-        updateRanking(ranking, truth);
-    }
+	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth)
+	{
+		int[] ranking = prediction.getRanking();
+		if (ranking == null)
+		{
+			throw new ArgumentNullException("Bipartition is null");
+		}
+		if (ranking.length != truth.length)
+		{
+			throw new IllegalArgumentException("The dimensions of the "
+					+ "bipartition and the ground truth array do not match");
+		}
+		updateRanking(ranking, truth);
+	}
 
-    /**
-     * Updates the measure based on an example
-     *
-     * @param ranking the predicted ranking
-     * @param truth the ground truth
-     */
-    protected abstract void updateRanking(int[] ranking, boolean[] truth);
+	@Override
+	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	{
+		throw new IllegalArgumentException("not implemented");
+	}
+
+	/**
+	 * Updates the measure based on an example
+	 *
+	 * @param ranking the predicted ranking
+	 * @param truth the ground truth
+	 */
+	protected abstract void updateRanking(int[] ranking, boolean[] truth);
 
 }

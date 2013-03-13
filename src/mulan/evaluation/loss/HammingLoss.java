@@ -27,23 +27,46 @@ package mulan.evaluation.loss;
  * @author Grigorios Tsoumakas
  * @version 2010.12.01
  */
-public class HammingLoss extends BipartitionLossFunctionBase {
+public class HammingLoss extends BipartitionLossFunctionBase
+{
 
-    @Override
-    public String getName() {
-        return "Hamming Loss";
-    }
+	@Override
+	public String getName()
+	{
+		return "Hamming Loss";
+	}
 
-  
-    @Override
-    public double computeLoss(boolean[] bipartition, boolean[] groundTruth) {
-        double symmetricDifference = 0;
-        for (int i = 0; i < groundTruth.length; i++) {
-            if (bipartition[i] != groundTruth[i]) {
-                symmetricDifference++;
-            }
-        }
-        return symmetricDifference / groundTruth.length;
-    }
+	@Override
+	public double computeLoss(boolean[] bipartition, boolean[] groundTruth)
+	{
+		double symmetricDifference = 0;
+		for (int i = 0; i < groundTruth.length; i++)
+		{
+			if (bipartition[i] != groundTruth[i])
+			{
+				symmetricDifference++;
+			}
+		}
+		return symmetricDifference / groundTruth.length;
+	}
 
+	@Override
+	public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing)
+	{
+		double symmetricDifference = 0;
+		double sum = 0;
+		for (int i = 0; i < groundTruth.length; i++)
+		{
+			if (!isMissing[i])
+			{
+				sum++;
+				if (bipartition[i] != groundTruth[i])
+					symmetricDifference++;
+			}
+		}
+		if (sum == 0)
+			return 0;
+		else
+			return symmetricDifference / (double) sum;
+	}
 }

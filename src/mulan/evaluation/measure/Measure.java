@@ -29,54 +29,57 @@ import mulan.classifier.MultiLabelOutput;
  * 
  * @author Jozef Vilcek
  */
-public interface Measure {
+public interface Measure
+{
 
-    /**
-     * Gets the name of a measure.
-     * @return the name of a measure.
-     */
-    String getName();
+	/**
+	 * Gets the name of a measure.
+	 * @return the name of a measure.
+	 */
+	String getName();
 
-    /**
-     * Gets the value of a measure. The measure is incrementally cumulated for learner's
-     * prediction by each {@link Measure#update(MultiLabelOutput, boolean[])} call. The value
-     * returned by the method, returns sum of all update calls divided by the number
-     * of calls (average of all measures for all predictions).
-     *
-     * @return the average measure value computed so far
-     */
-    double getValue();
+	/**
+	 * Gets the value of a measure. The measure is incrementally cumulated for learner's
+	 * prediction by each {@link Measure#update(MultiLabelOutput, boolean[])} call. The value
+	 * returned by the method, returns sum of all update calls divided by the number
+	 * of calls (average of all measures for all predictions).
+	 *
+	 * @return the average measure value computed so far
+	 */
+	double getValue();
 
-    /**
-     * Gets an 'ideal' value of a measure. The 'ideal' means, that the value
-     * represents the best achievable performance of a learner for an prediction of
-     * a multi-label task and associated true labels.
-     *
-     * @return the ideal value
-     */
-    double getIdealValue();
+	/**
+	 * Gets an 'ideal' value of a measure. The 'ideal' means, that the value
+	 * represents the best achievable performance of a learner for an prediction of
+	 * a multi-label task and associated true labels.
+	 *
+	 * @return the ideal value
+	 */
+	double getIdealValue();
 
-    /**
-     * Computes the value of a measure for the given prediction and true labels. The immediate value of
-     * a measure is	returned and result is added to the cumulated measure value.
-     *
-     * @param prediction the prediction for which measure has to be computed
-     * @param truth the true labels bipartition for given prediction
-     * @see Measure#getValue()
-     */
-    void update(MultiLabelOutput prediction, boolean[] truth);
+	/**
+	 * Computes the value of a measure for the given prediction and true labels. The immediate value of
+	 * a measure is	returned and result is added to the cumulated measure value.
+	 *
+	 * @param prediction the prediction for which measure has to be computed
+	 * @param truth the true labels bipartition for given prediction
+	 * @see Measure#getValue()
+	 */
+	void update(MultiLabelOutput prediction, boolean[] truth);
 
-    /**
-     * Creates a deep copy of the given measure using serialization.
-     *
-     * @return a deep copy of the measure
-     * @exception Exception if an error occurs while making copy of the measure.
-     */
-    public Measure makeCopy() throws Exception;
+	void update(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth);
 
-    /**
-     * Resets the cumulated measure value, so the process of computation can be started
-     * from beginning (e.g. for a new series of outputs from learning task).
-     */
-    void reset();
+	/**
+	 * Creates a deep copy of the given measure using serialization.
+	 *
+	 * @return a deep copy of the measure
+	 * @exception Exception if an error occurs while making copy of the measure.
+	 */
+	public Measure makeCopy() throws Exception;
+
+	/**
+	 * Resets the cumulated measure value, so the process of computation can be started
+	 * from beginning (e.g. for a new series of outputs from learning task).
+	 */
+	void reset();
 }
