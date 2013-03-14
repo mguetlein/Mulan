@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import mulan.classifier.MultiLabelLearner;
 import mulan.classifier.MultiLabelOutput;
 import mulan.data.MultiLabelInstances;
-import mulan.evaluation.measure.Coverage;
 import mulan.evaluation.measure.HammingLoss;
 import mulan.evaluation.measure.MacroAccuracy;
 import mulan.evaluation.measure.Measure;
@@ -169,7 +168,7 @@ public class MissingCapableEvaluator extends Evaluator
 			if (prediction.hasRanking())
 			{
 				// add ranking based measures
-				measures.add(new Coverage());
+				//				measures.add(new Coverage());
 			}
 		}
 		catch (final Exception ex)
