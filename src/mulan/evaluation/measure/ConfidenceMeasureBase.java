@@ -49,7 +49,7 @@ public abstract class ConfidenceMeasureBase extends MeasureBase
 	@Override
 	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
 	{
-		throw new IllegalArgumentException("not implemented");
+		throw new Error("not implemented, overwrite if required for " + this.getClass());
 	}
 
 	/**
