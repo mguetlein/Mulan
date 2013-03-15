@@ -101,7 +101,7 @@ public class SinglePredictionTracker
 		this.numRepetitions = numRepetitions;
 	}
 
-	public void update(int globalInstanceIndex, int labelIndex, boolean trueValue, boolean correct)
+	public synchronized void update(int globalInstanceIndex, int labelIndex, boolean trueValue, boolean correct)
 	{
 		if (!labelPredictions.containsKey(globalInstanceIndex + "_" + labelIndex))
 			labelPredictions.put(globalInstanceIndex + "_" + labelIndex, new Predictions(trueValue));
