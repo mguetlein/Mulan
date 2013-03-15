@@ -327,6 +327,11 @@ public class Evaluator
 		Evaluation[] evaluation = new Evaluation[someFolds];
 
 		Instances workingSet = new Instances(data.getDataSet());
+
+		int c = 0;
+		for (Instance instance : workingSet)
+			instance.setWeight(c++);
+
 		workingSet.randomize(new Random(seed));
 		for (int i = 0; i < someFolds; i++)
 		{
@@ -334,6 +339,9 @@ public class Evaluator
 			try
 			{
 				Instances train = workingSet.trainCV(someFolds, i);
+				for (Instance instance : train)
+					instance.setWeight(1.0);
+
 				Instances test = workingSet.testCV(someFolds, i);
 				MultiLabelInstances mlTrain = new MultiLabelInstances(train, data.getLabelsMetaData());
 				MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());

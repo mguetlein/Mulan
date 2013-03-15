@@ -179,6 +179,8 @@ public class MissingCapableEvaluator extends Evaluator
 		return measures;
 	}
 
+	private SinglePredictionTracker tracker;
+
 	@Override
 	public Evaluation evaluate(final MultiLabelLearner learner, final MultiLabelInstances data)
 			throws IllegalArgumentException, Exception
@@ -219,6 +221,9 @@ public class MissingCapableEvaluator extends Evaluator
 		{
 			final Instance instance = testData.instance(instanceIndex);
 
+			int globalInstanceIndex = (int) instance.weight();
+			instance.setWeight(1.0);
+
 			final boolean[] isMissing = MissingCapableEvaluator.getMissingLabels(instance, numLabels, labelIndices);
 			if (MissingCapableEvaluator.known(isMissing) == 0)
 			{
@@ -227,6 +232,12 @@ public class MissingCapableEvaluator extends Evaluator
 
 			final MultiLabelOutput output = learner.makePrediction(instance);
 			trueLabels = MissingCapableEvaluator.getTrueLabels(instance, numLabels, labelIndices);
+
+			if (tracker != null)
+				for (int labelIndex = 0; labelIndex < trueLabels.length; labelIndex++)
+					if (!isMissing[labelIndex])
+						tracker.update(globalInstanceIndex, labelIndex, trueLabels[labelIndex],
+								output.getBipartition()[labelIndex] == trueLabels[labelIndex]);
 
 			//			{
 			//				MultiLabelOutput prediction = MissingCapableEvaluator.getOutputForKnown(output, isMissing);
@@ -267,4 +278,8 @@ public class MissingCapableEvaluator extends Evaluator
 		return new Evaluation(measures, data);
 	}
 
+	public void setSinglePredictionTracker(SinglePredictionTracker tracker)
+	{
+		this.tracker = tracker;
+	}
 }
