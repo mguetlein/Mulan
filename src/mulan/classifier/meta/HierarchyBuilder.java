@@ -314,7 +314,7 @@ public class HierarchyBuilder implements Serializable
 				// cluster the labels
 				clusterer.setMaxIterations(20);
 				clusterer.setNumClusters(clusters);
-				System.out.println("balanced clustering");
+				//				System.out.println("balanced clustering");
 				clusterer.buildClusterer(transposed);
 				// return the clustering
 				for (int i = 0; i < labels.size(); i++)
