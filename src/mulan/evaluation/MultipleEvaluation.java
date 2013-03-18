@@ -255,24 +255,39 @@ public class MultipleEvaluation
 
 	public double getResult(String measureName, int experiment)
 	{
+		Double d = null;
 		Evaluation e = evaluations.get(experiment);
 		for (Measure measure : e.getMeasures())
 			if (measure.getName().equals(measureName))
-				return measure.getValue();
-		throw new IllegalStateException("measure not found");
+			{
+				d = measure.getValue();
+				break;
+			}
+		return checkResult(d, measureName, experiment, -1);
 	}
 
 	public double getResult(String measureName, int experiment, int label)
 	{
+		Double d = null;
 		Evaluation e = evaluations.get(experiment);
 		for (Measure measure : e.getMeasures())
 			if (measure.getName().equals(measureName))
 			{
 				if (!(measure instanceof MacroAverageMeasure))
 					throw new IllegalStateException("not a macro measure");
-				return ((MacroAverageMeasure) measure).getValue(label);
+				d = ((MacroAverageMeasure) measure).getValue(label);
+				break;
 			}
-		throw new IllegalStateException("measure not found");
+		return checkResult(d, measureName, experiment, label);
+	}
+
+	private double checkResult(Double d, String measureName, int experiment, int label)
+	{
+		if (d == null)
+			throw new IllegalStateException("measure not found: " + measureName);
+		if (d.isNaN())
+			System.err.println("NaN for " + measureName + ", exp: " + experiment + ", label: " + label);
+		return d;
 	}
 
 	/**

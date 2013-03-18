@@ -29,6 +29,8 @@ public abstract class LabelBasedAccuracy extends LabelBasedBipartitionMeasureBas
 
 	protected static double accuracy(double tp, double tn, double fp, double fn)
 	{
+		if ((tp + tn + fp + fn) == 0)
+			return Double.NaN;
 		if ((tp + tn) == 0)
 			return 0;
 		return (tp + tn) / (tp + tn + fp + fn);

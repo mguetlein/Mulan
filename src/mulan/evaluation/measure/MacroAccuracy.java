@@ -19,8 +19,12 @@ public class MacroAccuracy extends LabelBasedAccuracy implements MacroAverageMea
 		int count = 0;
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
 		{
-			sum += accuracy(labelIndex);
-			count++;
+			double acc = accuracy(labelIndex);
+			if (!Double.isNaN(acc))
+			{
+				sum += accuracy(labelIndex);
+				count++;
+			}
 		}
 		return sum / count;
 	}
