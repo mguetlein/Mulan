@@ -25,14 +25,14 @@ public class SinglePredictionTracker
 			numTotal++;
 		}
 
-		public String getMissclassified()
+		public Double getMissclassified()
 		{
 			if (numTotal != numRepetitions)
 				throw new IllegalStateException();
-			return (1 - (numCorrect / (double) numTotal)) + "";
+			return (1 - (numCorrect / (double) numTotal));
 		}
 
-		public String getMissclassifiedAsTrue()
+		public Double getMissclassifiedAsTrue()
 		{
 			if (!trueValue)
 				return getMissclassified();
@@ -40,7 +40,7 @@ public class SinglePredictionTracker
 				return null;
 		}
 
-		public String getMissclassifiedAsFalse()
+		public Double getMissclassifiedAsFalse()
 		{
 			if (trueValue)
 				return getMissclassified();
@@ -64,11 +64,11 @@ public class SinglePredictionTracker
 			super.update(correct);
 		}
 
-		public String getMissclassified()
+		public Double getMissclassified()
 		{
 			if (numTotal != (numRepetitions * labels.size()))
 				throw new IllegalStateException();
-			return (1 - (numCorrect / (double) numTotal)) + "";
+			return (1 - (numCorrect / (double) numTotal));
 		}
 
 		public String getNumLabels()
