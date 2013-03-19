@@ -90,13 +90,16 @@ public class SinglePredictionTracker
 	HashMap<String, Predictions> labelPredictions = new HashMap<String, Predictions>();
 	HashMap<Integer, AllLabelPredictions> allLabelPredictions = new HashMap<Integer, AllLabelPredictions>();
 
-	String dataFile;
+	String datasetName;
 	MultiLabelInstances data;
 	int numRepetitions;
+	String experimentName;
 
-	public SinglePredictionTracker(String dataFile, MultiLabelInstances data, int numRepetitions)
+	public SinglePredictionTracker(String datasetName, String experimentName, MultiLabelInstances data,
+			int numRepetitions)
 	{
-		this.dataFile = dataFile;
+		this.datasetName = datasetName;
+		this.experimentName = experimentName;
 		this.data = data;
 		this.numRepetitions = numRepetitions;
 	}
