@@ -25,6 +25,16 @@ public class SinglePredictionTracker
 			numTotal++;
 		}
 
+		public Double getClassified()
+		{
+			if (numTotal != numRepetitions)
+				throw new IllegalStateException();
+			if (trueValue == true)
+				return (numCorrect / (double) numTotal);
+			else
+				return (1 - (numCorrect / (double) numTotal));
+		}
+
 		public Double getMissclassified()
 		{
 			if (numTotal != numRepetitions)
