@@ -13,8 +13,10 @@ import mulan.classifier.MultiLabelOutput;
 import mulan.data.MultiLabelInstances;
 import mulan.evaluation.measure.HammingLoss;
 import mulan.evaluation.measure.MacroAccuracy;
+import mulan.evaluation.measure.MacroFMeasure;
 import mulan.evaluation.measure.Measure;
 import mulan.evaluation.measure.MicroAccuracy;
+import mulan.evaluation.measure.MicroFMeasure;
 import mulan.evaluation.measure.SubsetAccuracy;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -163,6 +165,9 @@ public class MissingCapableEvaluator extends Evaluator
 				int numOfLabels = data.getNumLabels();
 				measures.add(new MicroAccuracy(numOfLabels));
 				measures.add(new MacroAccuracy(numOfLabels));
+
+				measures.add(new MicroFMeasure(numOfLabels));
+				measures.add(new MacroFMeasure(numOfLabels));
 			}
 			// add ranking-based measures if applicable
 			if (prediction.hasRanking())
