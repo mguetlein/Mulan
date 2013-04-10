@@ -61,6 +61,7 @@ import mulan.evaluation.measure.MicroSpecificity;
 import mulan.evaluation.measure.OneError;
 import mulan.evaluation.measure.RankingLoss;
 import mulan.evaluation.measure.SubsetAccuracy;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -321,6 +322,23 @@ public class Evaluator
 		return innerCrossValidate(learner, data, true, measures, someFolds);
 	}
 
+	MultiLabelLearner imputationLearner = null;
+	Random randomImputation = null;
+
+	public void setImputationLearner(MultiLabelLearner mlcAlgorithm)
+	{
+		if (randomImputation != null)
+			throw new IllegalArgumentException("please do either set an imputation learner or enable random imputation");
+		this.imputationLearner = mlcAlgorithm;
+	}
+
+	public void setImputationAtRandom(Random random)
+	{
+		if (imputationLearner != null)
+			throw new IllegalArgumentException("please do either set an imputation learner or enable random imputation");
+		this.randomImputation = random;
+	}
+
 	private MultipleEvaluation innerCrossValidate(MultiLabelLearner learner, MultiLabelInstances data,
 			boolean hasMeasures, List<Measure> measures, int someFolds)
 	{
@@ -344,6 +362,82 @@ public class Evaluator
 
 				Instances test = workingSet.testCV(someFolds, i);
 				MultiLabelInstances mlTrain = new MultiLabelInstances(train, data.getLabelsMetaData());
+
+				if (imputationLearner != null || randomImputation != null)
+				{
+					int fillCounter = 0;
+					int nonMissing = 0;
+
+					MultiLabelLearner missingFillerClone = null;
+					if (imputationLearner != null)
+					{
+						missingFillerClone = imputationLearner.makeCopy();
+						missingFillerClone.build(mlTrain);
+					}
+					for (int j = 0; j < mlTrain.getNumLabels(); j++)
+					{
+						Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
+						if (mlTrain.getDataSet().numDistinctValues(label) != 2)
+							throw new Error("WTF");
+					}
+					for (int instanceIndex = 0; instanceIndex < mlTrain.getNumInstances(); instanceIndex++)
+					{
+						boolean hasMissing = false;
+						for (int j = 0; j < mlTrain.getNumLabels(); j++)
+						{
+							Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
+							if (mlTrain.getDataSet().get(instanceIndex).isMissing(label))
+							{
+								hasMissing = true;
+								break;
+							}
+							else
+							{
+								//just checking
+								String val = mlTrain.getDataSet().get(i).stringValue(label);
+								if (!val.equals("1") && !val.equals("0"))
+									throw new Error("WTF");
+							}
+
+						}
+						if (hasMissing)
+						{
+							MultiLabelOutput prediction = null;
+							if (imputationLearner != null)
+							{
+								prediction = missingFillerClone.makePrediction(mlTrain.getDataSet().get(instanceIndex));
+								if (prediction.getBipartition().length != mlTrain.getNumLabels())
+									throw new Error("WTF");
+							}
+							for (int labelIndex = 0; labelIndex < mlTrain.getNumLabels(); labelIndex++)
+							{
+								Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[labelIndex]);
+								if (mlTrain.getDataSet().get(instanceIndex).isMissing(label))
+								{
+									fillCounter++;
+									if (imputationLearner != null)
+										mlTrain.getDataSet().get(instanceIndex)
+												.setValue(label, prediction.getBipartition()[labelIndex] ? "1" : "0");
+									else if (randomImputation != null)
+										mlTrain.getDataSet().get(instanceIndex)
+												.setValue(label, randomImputation.nextBoolean() ? "1" : "0");
+									else
+										throw new Error("WTF");
+								}
+								else
+									nonMissing++;
+							}
+						}
+						else
+							nonMissing += mlTrain.getNumLabels();
+					}
+					if (fillCounter + nonMissing != mlTrain.getNumInstances() * mlTrain.getNumLabels())
+						throw new Error("WTF");
+					System.out.println("fill a total of " + fillCounter + " missing values in training fold with "
+							+ mlTrain.getNumInstances() + " instances and " + mlTrain.getNumLabels()
+							+ " labels (non-missing: " + nonMissing + ")");
+				}
+
 				MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());
 				MultiLabelLearner clone = learner.makeCopy();
 				clone.build(mlTrain);
