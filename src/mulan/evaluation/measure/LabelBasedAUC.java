@@ -29,57 +29,96 @@ import weka.core.FastVector;
  * @author Grigorios Tsoumakas
  * @version 2012.07.17
  */
-public abstract class LabelBasedAUC extends ConfidenceMeasureBase {
+public abstract class LabelBasedAUC extends ConfidenceMeasureBase
+{
 
-    /** The number of labels */
-    protected int numOfLabels;
-    /** The predictions for each label */
-    protected FastVector[] m_Predictions;
-    /** The predictions for all labels */
-    protected FastVector all_Predictions;
+	/** The number of labels */
+	protected int numOfLabels;
+	/** The predictions for each label */
+	protected FastVector[] m_Predictions;
+	/** The predictions for all labels */
+	protected FastVector all_Predictions;
 
-    /**
-     * Creates a new instance of this class
-     * 
-     * @param numOfLabels the number of labels
-     */
-    public LabelBasedAUC(int numOfLabels) {
-        this.numOfLabels = numOfLabels;
-        m_Predictions = new FastVector[numOfLabels];
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
-            m_Predictions[labelIndex] = new FastVector();
-        }
-        all_Predictions = new FastVector();
-    }
+	/**
+	 * Creates a new instance of this class
+	 * 
+	 * @param numOfLabels the number of labels
+	 */
+	public LabelBasedAUC(int numOfLabels)
+	{
+		this.numOfLabels = numOfLabels;
+		m_Predictions = new FastVector[numOfLabels];
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			m_Predictions[labelIndex] = new FastVector();
+		}
+		all_Predictions = new FastVector();
+	}
 
-    public void reset() {
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
-            m_Predictions[labelIndex] = new FastVector();
-        }
-        all_Predictions = new FastVector();
-    }
+	public void reset()
+	{
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			m_Predictions[labelIndex] = new FastVector();
+		}
+		all_Predictions = new FastVector();
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
-   
-    protected void updateConfidence(double[] confidences, boolean[] truth) {
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
+	public double getIdealValue()
+	{
+		return 1;
+	}
 
-            int classValue;
-            boolean actual = truth[labelIndex];
-            if (actual) {
-                classValue = 1;
-            } else {
-                classValue = 0;
-            }
+	protected void updateConfidence(double[] confidences, boolean[] truth)
+	{
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
 
-            double[] dist = new double[2];
-            dist[1] = confidences[labelIndex];
-            dist[0] = 1 - dist[1];
+			int classValue;
+			boolean actual = truth[labelIndex];
+			if (actual)
+			{
+				classValue = 1;
+			}
+			else
+			{
+				classValue = 0;
+			}
 
-            m_Predictions[labelIndex].addElement(new NominalPrediction(classValue, dist, 1));
-            all_Predictions.addElement(new NominalPrediction(classValue, dist, 1));
-        }
-    }
+			double[] dist = new double[2];
+			dist[1] = confidences[labelIndex];
+			dist[0] = 1 - dist[1];
+
+			m_Predictions[labelIndex].addElement(new NominalPrediction(classValue, dist, 1));
+			all_Predictions.addElement(new NominalPrediction(classValue, dist, 1));
+		}
+	}
+
+	@Override
+	protected void updateConfidence(double[] confidences, boolean[] truth, boolean[] missingTruth)
+	{
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			if (!missingTruth[labelIndex])
+			{
+				int classValue;
+				boolean actual = truth[labelIndex];
+				if (actual)
+				{
+					classValue = 1;
+				}
+				else
+				{
+					classValue = 0;
+				}
+
+				double[] dist = new double[2];
+				dist[1] = confidences[labelIndex];
+				dist[0] = 1 - dist[1];
+
+				m_Predictions[labelIndex].addElement(new NominalPrediction(classValue, dist, 1));
+				all_Predictions.addElement(new NominalPrediction(classValue, dist, 1));
+			}
+		}
+	}
 }

@@ -12,9 +12,11 @@ import mulan.classifier.MultiLabelLearner;
 import mulan.classifier.MultiLabelOutput;
 import mulan.data.MultiLabelInstances;
 import mulan.evaluation.measure.HammingLoss;
+import mulan.evaluation.measure.MacroAUC;
 import mulan.evaluation.measure.MacroAccuracy;
 import mulan.evaluation.measure.MacroFMeasure;
 import mulan.evaluation.measure.Measure;
+import mulan.evaluation.measure.MicroAUC;
 import mulan.evaluation.measure.MicroAccuracy;
 import mulan.evaluation.measure.MicroFMeasure;
 import mulan.evaluation.measure.SubsetAccuracy;
@@ -168,6 +170,9 @@ public class MissingCapableEvaluator extends Evaluator
 
 				measures.add(new MicroFMeasure(numOfLabels));
 				measures.add(new MacroFMeasure(numOfLabels));
+
+				measures.add(new MicroAUC(numOfLabels));
+				measures.add(new MacroAUC(numOfLabels));
 			}
 			// add ranking-based measures if applicable
 			if (prediction.hasRanking())

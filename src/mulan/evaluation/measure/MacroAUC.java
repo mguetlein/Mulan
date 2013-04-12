@@ -30,41 +30,52 @@ import weka.core.Utils;
  * @author Grigorios Tsoumakas
  * @version 2010.12.10
  */
-public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure {
+public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
+{
 
-    /**
-     * Creates a new instance of this class
-     *
-     * @param numOfLabels the number of labels
-     */
-    public MacroAUC(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Creates a new instance of this class
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public MacroAUC(int numOfLabels)
+	{
+		super(numOfLabels);
+	}
 
-    public String getName() {
-        return "Macro-averaged AUC";
-    }
+	public String getName()
+	{
+		return "Macro-averaged AUC";
+	}
 
-    public double getValue() {
-        double[] labelAUC = new double[numOfLabels];
-        for (int i = 0; i < numOfLabels; i++) {
-            ThresholdCurve tc = new ThresholdCurve();
-            Instances result = tc.getCurve(m_Predictions[i], 1);
-            labelAUC[i] = ThresholdCurve.getROCArea(result);
-        }
-        return Utils.mean(labelAUC);
-    }
+	public double getValue()
+	{
+		double[] labelAUC = new double[numOfLabels];
+		for (int i = 0; i < numOfLabels; i++)
+		{
+			if (m_Predictions[i].size() > 0)
+			{
+				ThresholdCurve tc = new ThresholdCurve();
+				Instances result = tc.getCurve(m_Predictions[i], 1);
+				labelAUC[i] = ThresholdCurve.getROCArea(result);
+			}
+		}
+		return Utils.mean(labelAUC);
+	}
 
-    /**
-     * Returns the AUC for a particular label
-     * 
-     * @param labelIndex the index of the label 
-     * @return the AUC for that label
-     */
-    public double getValue(int labelIndex) {
-        ThresholdCurve tc = new ThresholdCurve();
-        Instances result = tc.getCurve(m_Predictions[labelIndex], 1);
-        return ThresholdCurve.getROCArea(result);  
-    }
+	/**
+	 * Returns the AUC for a particular label
+	 * 
+	 * @param labelIndex the index of the label 
+	 * @return the AUC for that label
+	 */
+	public double getValue(int labelIndex)
+	{
+		if (m_Predictions[labelIndex].size() == 0)
+			return Double.NaN;
+		ThresholdCurve tc = new ThresholdCurve();
+		Instances result = tc.getCurve(m_Predictions[labelIndex], 1);
+		return ThresholdCurve.getROCArea(result);
+	}
 
 }

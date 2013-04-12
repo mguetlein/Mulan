@@ -368,11 +368,11 @@ public class Evaluator
 					int fillCounter = 0;
 					int nonMissing = 0;
 
-					MultiLabelLearner missingFillerClone = null;
+					MultiLabelLearner imputationLearnerClone = null;
 					if (imputationLearner != null)
 					{
-						missingFillerClone = imputationLearner.makeCopy();
-						missingFillerClone.build(mlTrain);
+						imputationLearnerClone = imputationLearner.makeCopy();
+						imputationLearnerClone.build(mlTrain);
 					}
 					for (int j = 0; j < mlTrain.getNumLabels(); j++)
 					{
@@ -398,14 +398,14 @@ public class Evaluator
 								if (!val.equals("1") && !val.equals("0"))
 									throw new Error("WTF");
 							}
-
 						}
 						if (hasMissing)
 						{
 							MultiLabelOutput prediction = null;
 							if (imputationLearner != null)
 							{
-								prediction = missingFillerClone.makePrediction(mlTrain.getDataSet().get(instanceIndex));
+								prediction = imputationLearnerClone.makePrediction(mlTrain.getDataSet().get(
+										instanceIndex));
 								if (prediction.getBipartition().length != mlTrain.getNumLabels())
 									throw new Error("WTF");
 							}
@@ -433,9 +433,9 @@ public class Evaluator
 					}
 					if (fillCounter + nonMissing != mlTrain.getNumInstances() * mlTrain.getNumLabels())
 						throw new Error("WTF");
-					System.out.println("fill a total of " + fillCounter + " missing values in training fold with "
-							+ mlTrain.getNumInstances() + " instances and " + mlTrain.getNumLabels()
-							+ " labels (non-missing: " + nonMissing + ")");
+					//					System.out.println("fill a total of " + fillCounter + " missing values in training fold with "
+					//							+ mlTrain.getNumInstances() + " instances and " + mlTrain.getNumLabels()
+					//							+ " labels (non-missing: " + nonMissing + ")");
 				}
 
 				MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());
