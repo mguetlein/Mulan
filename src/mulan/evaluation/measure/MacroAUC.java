@@ -20,6 +20,7 @@
  */
 package mulan.evaluation.measure;
 
+import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -51,16 +52,64 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 	public double getValue()
 	{
 		double[] labelAUC = new double[numOfLabels];
+		int nonNan = 0;
 		for (int i = 0; i < numOfLabels; i++)
 		{
-			if (m_Predictions[i].size() > 0)
-			{
-				ThresholdCurve tc = new ThresholdCurve();
-				Instances result = tc.getCurve(m_Predictions[i], 1);
-				labelAUC[i] = ThresholdCurve.getROCArea(result);
-			}
+			labelAUC[i] = getAUC(i);
+			if (!Double.isNaN(labelAUC[i]))
+				nonNan++;
 		}
-		return Utils.mean(labelAUC);
+		if (nonNan == 0)
+			throw new IllegalStateException("Make sure to handle MacroAUC NaNs properly");
+		double nonNanVals[] = new double[nonNan];
+		nonNan = 0;
+		for (int i = 0; i < numOfLabels; i++)
+			if (!Double.isNaN(labelAUC[i]))
+				nonNanVals[nonNan++] = labelAUC[i];
+		return Utils.mean(nonNanVals);
+	}
+
+	private double getAUC(int labelIndex)
+	{
+		if (m_Predictions[labelIndex].size() == 0)
+			return Double.NaN;
+		ThresholdCurve tc = new ThresholdCurve();
+		Instances result = tc.getCurve(m_Predictions[labelIndex], 1);
+		double d = ThresholdCurve.getROCArea(result);
+		if (!Double.isNaN(d))
+			return d;
+		else
+		{
+			int tP = 0, tN = 0, fP = 0, fN = 0;
+			//			System.err.println("\nauc problem solving");
+			for (int i = 0; i < m_Predictions[labelIndex].size(); i++)
+			{
+				NominalPrediction p = (NominalPrediction) m_Predictions[labelIndex].get(i);
+				//				System.err.println(p.actual() + " " + p.predicted());
+				if (p.predicted() == 1.0)
+				{
+					if (p.actual() == 1.0)
+						tP++;
+					else
+						fP++;
+				}
+				else
+				{
+					if (p.actual() == 0.0)
+						tN++;
+					else
+						fN++;
+				}
+			}
+			if (tP == 0 && fP > 0)
+				return 0.0;
+			else if (fP == 0 && tP > 0)
+				return 1.0;
+			else if (tP == 0 && fP == 0)
+				return Double.NaN;
+			else
+				throw new IllegalStateException("WTF " + tP + " " + fP + " " + tN + " " + fN);
+		}
 	}
 
 	/**
@@ -71,11 +120,7 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 	 */
 	public double getValue(int labelIndex)
 	{
-		if (m_Predictions[labelIndex].size() == 0)
-			return Double.NaN;
-		ThresholdCurve tc = new ThresholdCurve();
-		Instances result = tc.getCurve(m_Predictions[labelIndex], 1);
-		return ThresholdCurve.getROCArea(result);
+		return getAUC(labelIndex);
 	}
 
 }
