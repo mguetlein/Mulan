@@ -374,18 +374,20 @@ public class Evaluator
 						imputationLearnerClone = imputationLearner.makeCopy();
 						imputationLearnerClone.build(mlTrain);
 					}
-					for (int j = 0; j < mlTrain.getNumLabels(); j++)
-					{
-						Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
-						if (mlTrain.getDataSet().numDistinctValues(label) != 2)
-							throw new Error("WTF");
-					}
+					//					for (int j = 0; j < mlTrain.getNumLabels(); j++)
+					//					{
+					//						Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
+					//						if (mlTrain.getDataSet().numDistinctValues(label) != 2)
+					//							throw new Error("WTF");
+					//					}
 					for (int instanceIndex = 0; instanceIndex < mlTrain.getNumInstances(); instanceIndex++)
 					{
 						boolean hasMissing = false;
 						for (int j = 0; j < mlTrain.getNumLabels(); j++)
 						{
 							Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
+							//							System.err.println(i + " " + j + " " + label.index());
+
 							if (mlTrain.getDataSet().get(instanceIndex).isMissing(label))
 							{
 								hasMissing = true;
@@ -396,7 +398,7 @@ public class Evaluator
 								//just checking
 								String val = mlTrain.getDataSet().get(i).stringValue(label);
 								if (!val.equals("1") && !val.equals("0"))
-									throw new Error("WTF");
+									throw new Error("WTF : " + val);
 							}
 						}
 						if (hasMissing)

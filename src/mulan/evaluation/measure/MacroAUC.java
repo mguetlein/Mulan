@@ -101,16 +101,75 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 						fN++;
 				}
 			}
-			if (tP == 0 && fP > 0)
-				return 0.0;
-			else if (fP == 0 && tP > 0)
-				return 1.0;
-			else if (tP == 0 && fP == 0)
+			//			if (tP == 0 && tN == 0) // no correct predictions
+			//				return 0.0;
+			//			else if (fP == 0 && fP == 0) // no incorrect predictions
+			//				return 1.0;
+			//			else 
+			if (tP == 0 && fN == 0) // no positive instances
+				return Double.NaN;
+			else if (tN == 0 && fP == 0) // no negative instances
 				return Double.NaN;
 			else
-				throw new IllegalStateException("WTF " + tP + " " + fP + " " + tN + " " + fN);
+				throw new IllegalStateException("WTF TP:" + tP + " FP:" + fP + " TN:" + tN + " FN:" + fN);
 		}
 	}
+
+	//	private static NominalPrediction createPrediction(double actual, double predicted, double prob)
+	//	{
+	//		prob *= 0.5;
+	//		double[] dist;
+	//		if (actual == 1.0)
+	//		{
+	//			if (predicted == 1.0)
+	//				dist = new double[] { 0.5 - prob, 0.5 + prob };
+	//			else
+	//				dist = new double[] { 0.5 + prob, 0.5 - prob };
+	//		}
+	//		else
+	//		{
+	//			if (predicted == 0.0)
+	//				dist = new double[] { 0.5 + prob, 0.5 - prob };
+	//			else
+	//				dist = new double[] { 0.5 - prob, 0.5 + prob };
+	//		}
+	//		System.out.println(actual + " " + predicted + " " + Arrays.toString(dist));
+	//		return new NominalPrediction(actual, dist);
+	//	}
+	//
+	//	public static void main(String args[])
+	//	{
+	//		@SuppressWarnings("deprecation")
+	//		FastVector<NominalPrediction> preds = new FastVector<NominalPrediction>();
+	//		preds.add(createPrediction(0.0, 0.0, 0.7));
+	//		preds.add(createPrediction(1.0, 0.0, 0.2));
+	//		//		preds.add(createPrediction(1.0, 0.0, 0.3));
+	//		//		preds.add(createPrediction(0.0, 0.0, 0.6));
+	//
+	//		int tP = 0, tN = 0, fP = 0, fN = 0;
+	//		for (int i = 0; i < preds.size(); i++)
+	//		{
+	//			NominalPrediction p = (NominalPrediction) preds.get(i);
+	//			if (p.predicted() == 1.0)
+	//			{
+	//				if (p.actual() == 1.0)
+	//					tP++;
+	//				else
+	//					fP++;
+	//			}
+	//			else
+	//			{
+	//				if (p.actual() == 0.0)
+	//					tN++;
+	//				else
+	//					fN++;
+	//			}
+	//		}
+	//		System.out.println("TP:" + tP + " FP:" + fP + " TN:" + tN + " FN:" + fN);
+	//		ThresholdCurve tc = new ThresholdCurve();
+	//		Instances result = tc.getCurve(preds, 1);
+	//		System.out.println(ThresholdCurve.getROCArea(result));
+	//	}
 
 	/**
 	 * Returns the AUC for a particular label
