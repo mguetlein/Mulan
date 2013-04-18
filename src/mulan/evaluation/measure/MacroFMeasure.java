@@ -26,53 +26,74 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class MacroFMeasure extends LabelBasedFMeasure implements MacroAverageMeasure {
+public class MacroFMeasure extends LabelBasedFMeasure implements MacroAverageMeasure
+{
 
-    /**
-     * Constructs a new object with given number of labels and beta=1
-     *
-     * @param numOfLabels the number of labels
-     */
-    public MacroFMeasure(int numOfLabels) {
-        this(numOfLabels, 1);
-    }
+	boolean weighted;
 
-    /**
-     * Full constructor
-     *
-     * @param numOfLabels the number of labels
-     * @param beta controls the combination of precision and recall
-     */
-    public MacroFMeasure(int numOfLabels, double beta) {
-        super(numOfLabels, beta);
-    }
+	/**
+	 * Constructs a new object with given number of labels and beta=1
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public MacroFMeasure(int numOfLabels)
+	{
+		this(numOfLabels, false);
+	}
 
-    public String getName() {
-        return "Macro-averaged F-Measure";
-    }
+	public MacroFMeasure(int numOfLabels, boolean weighted)
+	{
+		this(numOfLabels, 1, weighted);
+	}
 
-    public double getValue() {
-        double sum = 0;
-        int count = 0;
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
-            sum += InformationRetrievalMeasures.fMeasure(truePositives[labelIndex],
-                    falsePositives[labelIndex],
-                    falseNegatives[labelIndex], beta);
-            count++;
-        }
-        return sum / count;
-    }
+	/**
+	 * Full constructor
+	 *
+	 * @param numOfLabels the number of labels
+	 * @param beta controls the combination of precision and recall
+	 */
+	public MacroFMeasure(int numOfLabels, double beta)
+	{
+		this(numOfLabels, beta, false);
+	}
 
-    /**
-     * Returns the F-Measure for a label
-     *
-     * @param labelIndex the index of a label (starting from 0)
-     * @return the F-Measure for the given label
-     */
-    public double getValue(int labelIndex) {
-        return InformationRetrievalMeasures.fMeasure(truePositives[labelIndex],
-                falsePositives[labelIndex],
-                falseNegatives[labelIndex], beta);
-    }
+	public MacroFMeasure(int numOfLabels, double beta, boolean weighted)
+	{
+		super(numOfLabels, beta);
+		this.weighted = weighted;
+	}
+
+	public String getName()
+	{
+		return "Macro-averaged F-Measure weighted:" + weighted;
+	}
+
+	public double getValue()
+	{
+		double sum = 0;
+		double count = 0;
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			double w = 1;
+			if (weighted)
+				w = numNotMissing(labelIndex);
+			sum += InformationRetrievalMeasures.fMeasure(truePositives[labelIndex], falsePositives[labelIndex],
+					falseNegatives[labelIndex], beta) * w;
+			count += w;
+		}
+		return sum / count;
+	}
+
+	/**
+	 * Returns the F-Measure for a label
+	 *
+	 * @param labelIndex the index of a label (starting from 0)
+	 * @return the F-Measure for the given label
+	 */
+	public double getValue(int labelIndex)
+	{
+		return InformationRetrievalMeasures.fMeasure(truePositives[labelIndex], falsePositives[labelIndex],
+				falseNegatives[labelIndex], beta);
+	}
 
 }

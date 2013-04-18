@@ -20,10 +20,17 @@
  */
 package mulan.evaluation.measure;
 
+import java.util.Random;
+
+import javax.swing.JDialog;
+
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
 
 /**
  * Implementation of the macro-averaged AUC measure.
@@ -34,6 +41,8 @@ import weka.core.Utils;
 public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 {
 
+	private boolean weighted;
+
 	/**
 	 * Creates a new instance of this class
 	 *
@@ -41,32 +50,39 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 	 */
 	public MacroAUC(int numOfLabels)
 	{
+		this(numOfLabels, false);
+	}
+
+	public MacroAUC(int numOfLabels, boolean weighted)
+	{
 		super(numOfLabels);
+		this.weighted = weighted;
 	}
 
 	public String getName()
 	{
-		return "Macro-averaged AUC";
+		return "Macro-averaged AUC weighted:" + weighted;
 	}
 
 	public double getValue()
 	{
-		double[] labelAUC = new double[numOfLabels];
-		int nonNan = 0;
+		double count = 0;
+		double sum = 0;
 		for (int i = 0; i < numOfLabels; i++)
 		{
-			labelAUC[i] = getAUC(i);
-			if (!Double.isNaN(labelAUC[i]))
-				nonNan++;
+			double auc = getAUC(i);
+			if (!Double.isNaN(auc))
+			{
+				double w = 1;
+				if (weighted)
+					w = m_Predictions[i].size();
+				sum += auc * w;
+				count += w;
+			}
 		}
-		if (nonNan == 0)
+		if (sum == 0)
 			throw new IllegalStateException("Make sure to handle MacroAUC NaNs properly");
-		double nonNanVals[] = new double[nonNan];
-		nonNan = 0;
-		for (int i = 0; i < numOfLabels; i++)
-			if (!Double.isNaN(labelAUC[i]))
-				nonNanVals[nonNan++] = labelAUC[i];
-		return Utils.mean(nonNanVals);
+		return sum / count;
 	}
 
 	private double getAUC(int labelIndex)
@@ -115,61 +131,125 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 		}
 	}
 
-	//	private static NominalPrediction createPrediction(double actual, double predicted, double prob)
-	//	{
-	//		prob *= 0.5;
-	//		double[] dist;
-	//		if (actual == 1.0)
-	//		{
-	//			if (predicted == 1.0)
-	//				dist = new double[] { 0.5 - prob, 0.5 + prob };
-	//			else
-	//				dist = new double[] { 0.5 + prob, 0.5 - prob };
-	//		}
-	//		else
-	//		{
-	//			if (predicted == 0.0)
-	//				dist = new double[] { 0.5 + prob, 0.5 - prob };
-	//			else
-	//				dist = new double[] { 0.5 - prob, 0.5 + prob };
-	//		}
-	//		System.out.println(actual + " " + predicted + " " + Arrays.toString(dist));
-	//		return new NominalPrediction(actual, dist);
-	//	}
-	//
-	//	public static void main(String args[])
-	//	{
-	//		@SuppressWarnings("deprecation")
-	//		FastVector<NominalPrediction> preds = new FastVector<NominalPrediction>();
-	//		preds.add(createPrediction(0.0, 0.0, 0.7));
-	//		preds.add(createPrediction(1.0, 0.0, 0.2));
-	//		//		preds.add(createPrediction(1.0, 0.0, 0.3));
-	//		//		preds.add(createPrediction(0.0, 0.0, 0.6));
-	//
-	//		int tP = 0, tN = 0, fP = 0, fN = 0;
-	//		for (int i = 0; i < preds.size(); i++)
-	//		{
-	//			NominalPrediction p = (NominalPrediction) preds.get(i);
-	//			if (p.predicted() == 1.0)
-	//			{
-	//				if (p.actual() == 1.0)
-	//					tP++;
-	//				else
-	//					fP++;
-	//			}
-	//			else
-	//			{
-	//				if (p.actual() == 0.0)
-	//					tN++;
-	//				else
-	//					fN++;
-	//			}
-	//		}
-	//		System.out.println("TP:" + tP + " FP:" + fP + " TN:" + tN + " FN:" + fN);
-	//		ThresholdCurve tc = new ThresholdCurve();
-	//		Instances result = tc.getCurve(preds, 1);
-	//		System.out.println(ThresholdCurve.getROCArea(result));
-	//	}
+	private static NominalPrediction createPrediction(double actual, double predicted, double prob)
+	{
+		prob *= 0.5;
+		double[] dist;
+		if (actual == 1.0)
+		{
+			if (predicted == 1.0)
+				dist = new double[] { 0.5 - prob, 0.5 + prob };
+			else
+				dist = new double[] { 0.5 + prob, 0.5 - prob };
+		}
+		else
+		{
+			if (predicted == 0.0)
+				dist = new double[] { 0.5 + prob, 0.5 - prob };
+			else
+				dist = new double[] { 0.5 - prob, 0.5 + prob };
+		}
+		//		System.out.println(actual + " " + predicted + " " + Arrays.toString(dist));
+		return new NominalPrediction(actual, dist);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static double computeAUC(FastVector<NominalPrediction> preds, boolean show) throws Exception
+	{
+		int tP = 0, tN = 0, fP = 0, fN = 0;
+		for (int i = 0; i < preds.size(); i++)
+		{
+			NominalPrediction p = (NominalPrediction) preds.get(i);
+			if (p.predicted() == 1.0)
+			{
+				if (p.actual() == 1.0)
+					tP++;
+				else
+					fP++;
+			}
+			else
+			{
+				if (p.actual() == 0.0)
+					tN++;
+				else
+					fN++;
+			}
+		}
+		String s = "TP:" + tP + " FP:" + fP + " TN:" + tN + " FN:" + fN;
+		System.out.println(s);
+		ThresholdCurve tc = new ThresholdCurve();
+		Instances result = tc.getCurve(preds, 1);
+		double auc = ThresholdCurve.getROCArea(result);
+		System.out.println(auc);
+		if (show)
+		{
+			ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
+			vmc.setROCString("(Area under ROC = " + Utils.doubleToString(tc.getROCArea(result), 4) + ")");
+			vmc.setName(result.relationName());
+			PlotData2D tempd = new PlotData2D(result);
+			tempd.setPlotName(result.relationName());
+			tempd.addInstanceNumberAttribute();
+			// specify which points are connected
+			boolean[] cp = new boolean[result.numInstances()];
+			for (int n = 1; n < cp.length; n++)
+				cp[n] = true;
+			tempd.setConnectPoints(cp);
+			// add plot
+			vmc.addPlot(tempd);
+			JDialog d = new JDialog();
+			d.setTitle("auc: " + auc + " - " + s);
+			d.getContentPane().add(vmc);
+			d.pack();
+			d.setVisible(true);
+		}
+		System.out.println();
+		return auc;
+	}
+
+	public static void main(String args[]) throws Exception
+	{
+		@SuppressWarnings("deprecation")
+		FastVector<NominalPrediction> preds = new FastVector<NominalPrediction>();
+
+		Random r = new Random();
+		long seed = r.nextLong();
+		seed = 8069103409826870036L;
+		System.out.println("seed " + seed);
+		r = new Random(seed);
+
+		int n = 2;
+		double d[] = new double[n];
+		for (int i = 0; i < n; i++)
+		{
+			double quality = 0.75;// r.nextDouble() / 2.0 + 0.5;
+
+			FastVector<NominalPrediction> preds_i = new FastVector<NominalPrediction>();
+
+			for (int j = 0; j < 10; j++)
+			{
+				double actual = r.nextBoolean() ? 0.0 : 1.0;
+				double predicted, conf;
+				if (actual == 0)
+				{
+					predicted = r.nextDouble() < quality ? actual : 1 - actual;
+					conf = actual == predicted ? Math.min(1.0, r.nextDouble() * 1.1) : r.nextDouble() * 0.9;
+				}
+				else
+				{
+					predicted = r.nextDouble() < quality ? actual : 1 - actual;
+					conf = actual == predicted ? Math.min(1.0, r.nextDouble() * 1.1) : r.nextDouble() * 0.9;
+				}
+				preds.add(createPrediction(actual, predicted, conf));
+				preds_i.add(createPrediction(actual, predicted, conf));
+			}
+			d[i] = computeAUC(preds_i, true);
+		}
+		double mean = Utils.mean(d);
+		System.out.println(mean);
+		double micro = computeAUC(preds, true);
+		System.out.println(Math.abs(micro - mean));
+
+	}
 
 	/**
 	 * Returns the AUC for a particular label

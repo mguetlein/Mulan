@@ -96,6 +96,12 @@ public abstract class LabelBasedBipartitionMeasureBase extends BipartitionMeasur
 		}
 	}
 
+	public double numNotMissing(int labelIndex)
+	{
+		return falseNegatives[labelIndex] + truePositives[labelIndex] + falsePositives[labelIndex]
+				+ trueNegatives[labelIndex];
+	}
+
 	public void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] isMissing)
 	{
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)

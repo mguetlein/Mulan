@@ -167,12 +167,15 @@ public class MissingCapableEvaluator extends Evaluator
 				int numOfLabels = data.getNumLabels();
 				measures.add(new MicroAccuracy(numOfLabels));
 				measures.add(new MacroAccuracy(numOfLabels));
+				measures.add(new MacroAccuracy(numOfLabels, true));
 
 				measures.add(new MicroFMeasure(numOfLabels));
 				measures.add(new MacroFMeasure(numOfLabels));
+				measures.add(new MacroFMeasure(numOfLabels, true));
 
 				measures.add(new MicroAUC(numOfLabels));
 				measures.add(new MacroAUC(numOfLabels));
+				measures.add(new MacroAUC(numOfLabels, true));
 			}
 			// add ranking-based measures if applicable
 			if (prediction.hasRanking())

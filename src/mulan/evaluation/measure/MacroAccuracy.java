@@ -2,6 +2,7 @@ package mulan.evaluation.measure;
 
 public class MacroAccuracy extends LabelBasedAccuracy implements MacroAverageMeasure
 {
+	boolean weighted;
 
 	/**
 	 * Constructs a new object with given number of labels
@@ -10,20 +11,29 @@ public class MacroAccuracy extends LabelBasedAccuracy implements MacroAverageMea
 	 */
 	public MacroAccuracy(int numOfLabels)
 	{
+		this(numOfLabels, false);
+	}
+
+	public MacroAccuracy(int numOfLabels, boolean weighted)
+	{
 		super(numOfLabels);
+		this.weighted = weighted;
 	}
 
 	public double getValue()
 	{
 		double sum = 0;
-		int count = 0;
+		double count = 0;
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
 		{
 			double acc = accuracy(labelIndex);
 			if (!Double.isNaN(acc))
 			{
-				sum += accuracy(labelIndex);
-				count++;
+				double w = 1.0;
+				if (weighted)
+					w = numNotMissing(labelIndex);
+				sum += accuracy(labelIndex) * w;
+				count += w;
 			}
 		}
 		return sum / count;
@@ -31,7 +41,7 @@ public class MacroAccuracy extends LabelBasedAccuracy implements MacroAverageMea
 
 	public String getName()
 	{
-		return "Macro-averaged Accuracy";
+		return "Macro-averaged Accuracy weighted:" + weighted;
 	}
 
 	/**
