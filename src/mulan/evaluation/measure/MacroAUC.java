@@ -176,15 +176,15 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 			}
 		}
 		String s = "TP:" + tP + " FP:" + fP + " TN:" + tN + " FN:" + fN;
-		System.out.println(s);
+		//		System.out.println(s);
 		ThresholdCurve tc = new ThresholdCurve();
 		Instances result = tc.getCurve(preds, 1);
 		double auc = ThresholdCurve.getROCArea(result);
-		System.out.println(auc);
+		//		System.out.println(auc);
 		if (show)
 		{
 			ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-			vmc.setROCString("(Area under ROC = " + Utils.doubleToString(tc.getROCArea(result), 4) + ")");
+			vmc.setROCString("(Area under ROC = " + Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
 			vmc.setName(result.relationName());
 			PlotData2D tempd = new PlotData2D(result);
 			tempd.setPlotName(result.relationName());
@@ -202,53 +202,57 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 			d.pack();
 			d.setVisible(true);
 		}
-		System.out.println();
+		//		System.out.println();
 		return auc;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void main(String args[]) throws Exception
 	{
-		@SuppressWarnings("deprecation")
-		FastVector<NominalPrediction> preds = new FastVector<NominalPrediction>();
-
 		Random r = new Random();
 		long seed = r.nextLong();
-		seed = 8069103409826870036L;
+		//		seed = 8069103409826870036L;
 		System.out.println("seed " + seed);
 		r = new Random(seed);
 
-		int n = 2;
-		double d[] = new double[n];
-		for (int i = 0; i < n; i++)
+		for (int x = 0; x < 1000; x++)
 		{
-			double quality = 0.75;// r.nextDouble() / 2.0 + 0.5;
+			FastVector<NominalPrediction> preds = new FastVector<NominalPrediction>();
 
-			FastVector<NominalPrediction> preds_i = new FastVector<NominalPrediction>();
-
-			for (int j = 0; j < 10; j++)
+			double d[] = new double[2];
+			for (int i = 0; i < 2; i++)
 			{
-				double actual = r.nextBoolean() ? 0.0 : 1.0;
-				double predicted, conf;
-				if (actual == 0)
-				{
-					predicted = r.nextDouble() < quality ? actual : 1 - actual;
-					conf = actual == predicted ? Math.min(1.0, r.nextDouble() * 1.1) : r.nextDouble() * 0.9;
-				}
+				double activeIs1;
+				if (i == 0)
+					activeIs1 = 0.8;
 				else
-				{
-					predicted = r.nextDouble() < quality ? actual : 1 - actual;
-					conf = actual == predicted ? Math.min(1.0, r.nextDouble() * 1.1) : r.nextDouble() * 0.9;
-				}
-				preds.add(createPrediction(actual, predicted, conf));
-				preds_i.add(createPrediction(actual, predicted, conf));
-			}
-			d[i] = computeAUC(preds_i, true);
-		}
-		double mean = Utils.mean(d);
-		System.out.println(mean);
-		double micro = computeAUC(preds, true);
-		System.out.println(Math.abs(micro - mean));
+					activeIs1 = 0.2;
 
+				FastVector<NominalPrediction> preds_i = new FastVector<NominalPrediction>();
+
+				for (int j = 0; j < 100; j++)
+				{
+					double actual = r.nextDouble() < activeIs1 ? 1 : 0;
+					double predicted = r.nextDouble() < activeIs1 ? 1 : 0;
+					double conf = actual == predicted ? Math.min(1.0, r.nextDouble() * 1.1) : r.nextDouble() * 0.9;
+
+					preds.add(createPrediction(actual, predicted, conf));
+					preds_i.add(createPrediction(actual, predicted, conf));
+				}
+				d[i] = computeAUC(preds_i, false);
+				System.out.println("auc " + d[i]);
+			}
+			double cummulative = computeAUC(preds, false);
+			System.out.println("cumm=micro auc " + cummulative);
+
+			double mean = Utils.mean(d);
+			System.out.println("mean=macro auc " + mean);
+
+			//		System.out.println(Math.abs(cummulative - mean));
+
+			if (cummulative > d[0] && cummulative > d[1])
+				break;
+		}
 	}
 
 	/**

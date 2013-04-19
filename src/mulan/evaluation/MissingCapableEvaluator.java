@@ -16,11 +16,15 @@ import mulan.evaluation.measure.MacroAUC;
 import mulan.evaluation.measure.MacroAccuracy;
 import mulan.evaluation.measure.MacroFMeasure;
 import mulan.evaluation.measure.MacroMCC;
+import mulan.evaluation.measure.MacroRecall;
+import mulan.evaluation.measure.MacroSpecificity;
 import mulan.evaluation.measure.Measure;
 import mulan.evaluation.measure.MicroAUC;
 import mulan.evaluation.measure.MicroAccuracy;
 import mulan.evaluation.measure.MicroFMeasure;
 import mulan.evaluation.measure.MicroMCC;
+import mulan.evaluation.measure.MicroRecall;
+import mulan.evaluation.measure.MicroSpecificity;
 import mulan.evaluation.measure.SubsetAccuracy;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -182,6 +186,12 @@ public class MissingCapableEvaluator extends Evaluator
 				measures.add(new MicroMCC(numOfLabels));
 				measures.add(new MacroMCC(numOfLabels));
 				measures.add(new MacroMCC(numOfLabels, true));
+
+				measures.add(new MicroRecall(numOfLabels));
+				measures.add(new MacroRecall(numOfLabels));
+
+				measures.add(new MicroSpecificity(numOfLabels));
+				measures.add(new MacroSpecificity(numOfLabels));
 			}
 			// add ranking-based measures if applicable
 			if (prediction.hasRanking())
