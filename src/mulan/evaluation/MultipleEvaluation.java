@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import mulan.data.MultiLabelInstances;
+import mulan.evaluation.measure.LabelBasedBipartitionMeasureBase;
 import mulan.evaluation.measure.MacroAverageMeasure;
 import mulan.evaluation.measure.Measure;
 
@@ -285,9 +286,33 @@ public class MultipleEvaluation
 	{
 		if (d == null)
 			throw new IllegalStateException("measure not found: " + measureName);
-		if (d.isNaN())
-			System.err.println("NaN for " + measureName + ", exp: " + experiment + ", label: " + label);
+		//		if (d.isNaN())
+		//			System.err.println("NaN for " + measureName + ", exp: " + experiment + ", label: " + label);
 		return d;
+	}
+
+	public double getConfMatrixValue(String confusionMatrixCell, String measureName, int experiment, int label)
+	{
+		Double d = null;
+		Evaluation e = evaluations.get(experiment);
+		for (Measure measure : e.getMeasures())
+			if (measure.getName().equals(measureName))
+			{
+				if (!(measure instanceof LabelBasedBipartitionMeasureBase))
+					throw new IllegalStateException("not a label based measure");
+				if (confusionMatrixCell.equals("TP"))
+					d = ((LabelBasedBipartitionMeasureBase) measure).getTP(label);
+				else if (confusionMatrixCell.equals("TN"))
+					d = ((LabelBasedBipartitionMeasureBase) measure).getTN(label);
+				else if (confusionMatrixCell.equals("FP"))
+					d = ((LabelBasedBipartitionMeasureBase) measure).getFP(label);
+				else if (confusionMatrixCell.equals("FN"))
+					d = ((LabelBasedBipartitionMeasureBase) measure).getFN(label);
+				else
+					throw new Error("WTF");
+				break;
+			}
+		return checkResult(d, measureName, experiment, label);
 	}
 
 	/**
@@ -307,5 +332,15 @@ public class MultipleEvaluation
 			sb.append(";");
 		}
 		return sb.toString();
+	}
+
+	public double getPctInsideAD(int experiment)
+	{
+		return evaluations.get(experiment).getPctInsideAD();
+	}
+
+	public double getPctInsideAD(int experiment, int label)
+	{
+		return evaluations.get(experiment).getPctInsideAD(label);
 	}
 }

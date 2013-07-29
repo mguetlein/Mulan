@@ -29,23 +29,32 @@ import weka.core.Instances;
  * @author Grigorios Tsoumakas
  * @version 2010.12.10
  */
-public class MicroAUC extends LabelBasedAUC {
+public class MicroAUC extends LabelBasedAUC
+{
 
-    /**
-     * Creates a new instance of this class
-     * @param numOfLabels
-     */
-    public MicroAUC(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Creates a new instance of this class
+	 * @param numOfLabels
+	 */
+	public MicroAUC(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public String getName() {
-        return "Micro-averaged AUC";
-    }
+	public MicroAUC(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
+	}
 
-    public double getValue() {
-        ThresholdCurve tc = new ThresholdCurve();
-        Instances result = tc.getCurve(all_Predictions, 1);
-        return ThresholdCurve.getROCArea(result);
-    }
+	public String getName()
+	{
+		return "Micro-averaged AUC" + confLevel.getName();
+	}
+
+	public double getValue()
+	{
+		ThresholdCurve tc = new ThresholdCurve();
+		Instances result = tc.getCurve(all_Predictions, 1);
+		return ThresholdCurve.getROCArea(result);
+	}
 }

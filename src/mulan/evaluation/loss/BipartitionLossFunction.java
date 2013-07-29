@@ -38,5 +38,5 @@ public interface BipartitionLossFunction extends MultiLabelLossFunction
 	 */
 	public double computeLoss(boolean[] bipartition, boolean[] groundTruth);
 
-	public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing);
+	public double computeLoss(Boolean[] bipartition, Boolean[] groundTruth);
 }

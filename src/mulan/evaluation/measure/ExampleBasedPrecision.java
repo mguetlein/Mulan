@@ -26,35 +26,56 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class ExampleBasedPrecision extends ExampleBasedBipartitionMeasureBase {
+public class ExampleBasedPrecision extends ExampleBasedBipartitionMeasureBase
+{
+	public ExampleBasedPrecision(ConfidenceLevel confLevel)
+	{
+		super(confLevel);
+	}
 
-    public String getName() {
-        return "Example-Based Precision";
-    }
+	public ExampleBasedPrecision()
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL);
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
+	public String getName()
+	{
+		return "Example-Based Precision" + confLevel.getName();
+	}
 
-    @Override
-    protected void updateBipartition(boolean[] bipartition, boolean[] truth) {
-        double tp = 0;
-        double fp = 0;
-        double fn = 0;
-        for (int i = 0; i < truth.length; i++) {
-            if (bipartition[i]) {
-                if (truth[i]) {
-                    tp++;
-                } else {
-                    fp++;
-                }
-            } else {
-                if (truth[i]) {
-                    fn++;
-                }
-            }
-        }
-        sum += InformationRetrievalMeasures.precision(tp, fp, fn);
-        count++;
-    }
+	public double getIdealValue()
+	{
+		return 1;
+	}
+
+	@Override
+	protected void updateBipartition(boolean[] bipartition, boolean[] truth)
+	{
+		double tp = 0;
+		double fp = 0;
+		double fn = 0;
+		for (int i = 0; i < truth.length; i++)
+		{
+			if (bipartition[i])
+			{
+				if (truth[i])
+				{
+					tp++;
+				}
+				else
+				{
+					fp++;
+				}
+			}
+			else
+			{
+				if (truth[i])
+				{
+					fn++;
+				}
+			}
+		}
+		sum += InformationRetrievalMeasures.precision(tp, fp, fn);
+		count++;
+	}
 }

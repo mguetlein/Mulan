@@ -51,13 +51,13 @@ public class HammingLoss extends BipartitionLossFunctionBase
 	}
 
 	@Override
-	public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing)
+	public double computeLoss(Boolean[] bipartition, Boolean[] groundTruth)
 	{
 		double symmetricDifference = 0;
 		double sum = 0;
 		for (int i = 0; i < groundTruth.length; i++)
 		{
-			if (!isMissing[i])
+			if (bipartition[i] != null && groundTruth[i] != null)
 			{
 				sum++;
 				if (bipartition[i] != groundTruth[i])

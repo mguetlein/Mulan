@@ -43,6 +43,8 @@ public class Evaluation
 	private MultiLabelInstances data;
 	private List<Measure> measures;
 
+	double pctInsideAD[];
+
 	/**
 	 * Creates a new evaluation object by deep copying the measure objects that
 	 * are given as parameters
@@ -52,7 +54,13 @@ public class Evaluation
 	 * outputting per label values of macro average measures
 	 * @throws Exception
 	 */
+
 	public Evaluation(List<Measure> someMeasures, MultiLabelInstances data) throws Exception
+	{
+		this(someMeasures, data, null);
+	}
+
+	public Evaluation(List<Measure> someMeasures, MultiLabelInstances data, double[] pctInsideAD) throws Exception
 	{
 		measures = new ArrayList<Measure>();
 		for (Measure m : someMeasures)
@@ -61,6 +69,7 @@ public class Evaluation
 			measures.add(newMeasure);
 		}
 		this.data = data;
+		this.pctInsideAD = pctInsideAD;
 	}
 
 	/**
@@ -127,4 +136,25 @@ public class Evaluation
 	{
 		return measures;
 	}
+
+	public double getPctInsideAD(int label)
+	{
+		return pctInsideAD[label];
+	}
+
+	public double getPctInsideAD()
+	{
+		double sum = 0;
+		int count = 0;
+		for (int i = 0; i < pctInsideAD.length; i++)
+		{
+			if (!Double.isNaN(pctInsideAD[i]))
+			{
+				sum += pctInsideAD[i];
+				count++;
+			}
+		}
+		return sum / (double) count;
+	}
+
 }

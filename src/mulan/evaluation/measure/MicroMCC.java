@@ -10,9 +10,9 @@ public class MicroMCC extends LabelBasedMCC
 	 *
 	 * @param numOfLabels the number of labels
 	 */
-	public MicroMCC(int numOfLabels)
+	public MicroMCC(ConfidenceLevel confLevel, int numOfLabels)
 	{
-		super(numOfLabels);
+		super(confLevel, numOfLabels);
 	}
 
 	public double getValue()
@@ -26,6 +26,6 @@ public class MicroMCC extends LabelBasedMCC
 
 	public String getName()
 	{
-		return "Micro-averaged MCC";
+		return "Micro-averaged MCC" + confLevel.getName();
 	}
 }

@@ -114,7 +114,8 @@ public class SinglePredictionTracker
 		this.numRepetitions = numRepetitions;
 	}
 
-	public synchronized void update(int globalInstanceIndex, int labelIndex, boolean trueValue, boolean correct)
+	public synchronized void update(int globalInstanceIndex, int labelIndex, boolean trueValue, boolean correct,
+			double origConf, double appDomain, double confInclAppDomain)
 	{
 		if (!labelPredictions.containsKey(globalInstanceIndex + "_" + labelIndex))
 			labelPredictions.put(globalInstanceIndex + "_" + labelIndex, new Predictions(trueValue));
@@ -123,6 +124,11 @@ public class SinglePredictionTracker
 		if (!allLabelPredictions.containsKey(globalInstanceIndex))
 			allLabelPredictions.put(globalInstanceIndex, new AllLabelPredictions());
 		allLabelPredictions.get(globalInstanceIndex).update(labelIndex, correct);
+	}
+
+	public MultiLabelInstances getData()
+	{
+		return data;
 	}
 
 }

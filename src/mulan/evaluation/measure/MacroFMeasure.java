@@ -43,7 +43,7 @@ public class MacroFMeasure extends LabelBasedFMeasure implements MacroAverageMea
 
 	public MacroFMeasure(int numOfLabels, boolean weighted)
 	{
-		this(numOfLabels, 1, weighted);
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels, 1, weighted);
 	}
 
 	/**
@@ -54,18 +54,23 @@ public class MacroFMeasure extends LabelBasedFMeasure implements MacroAverageMea
 	 */
 	public MacroFMeasure(int numOfLabels, double beta)
 	{
-		this(numOfLabels, beta, false);
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels, beta, false);
 	}
 
-	public MacroFMeasure(int numOfLabels, double beta, boolean weighted)
+	public MacroFMeasure(ConfidenceLevel confLevel, int numOfLabels, double beta, boolean weighted)
 	{
-		super(numOfLabels, beta);
+		super(confLevel, numOfLabels, beta);
 		this.weighted = weighted;
+	}
+
+	public MacroFMeasure(ConfidenceLevel confLevel, int numOfLabels, boolean weighted)
+	{
+		this(confLevel, numOfLabels, 1, weighted);
 	}
 
 	public String getName()
 	{
-		return "Macro-averaged F-Measure weighted:" + weighted;
+		return "Macro-averaged F-Measure weighted:" + weighted + confLevel.getName();
 	}
 
 	public double getValue()
@@ -77,9 +82,13 @@ public class MacroFMeasure extends LabelBasedFMeasure implements MacroAverageMea
 			double w = 1;
 			if (weighted)
 				w = numNotMissing(labelIndex);
-			sum += InformationRetrievalMeasures.fMeasure(truePositives[labelIndex], falsePositives[labelIndex],
+			double v = InformationRetrievalMeasures.fMeasure(truePositives[labelIndex], falsePositives[labelIndex],
 					falseNegatives[labelIndex], beta) * w;
-			count += w;
+			if (!Double.isNaN(v))
+			{
+				sum += v;
+				count += w;
+			}
 		}
 		return sum / count;
 	}

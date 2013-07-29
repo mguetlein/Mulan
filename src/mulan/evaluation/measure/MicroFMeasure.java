@@ -28,35 +28,45 @@ import weka.core.Utils;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class MicroFMeasure extends LabelBasedFMeasure {
+public class MicroFMeasure extends LabelBasedFMeasure
+{
 
-    /**
-     * Constructs a new object with given number of labels and beta=1
-     *
-     * @param numOfLabels the number of labels
-     */
-    public MicroFMeasure(int numOfLabels) {
-        this(numOfLabels, 1);
-    }
+	/**
+	 * Constructs a new object with given number of labels and beta=1
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public MicroFMeasure(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels, 1);
+	}
 
-    /**
-     * Full constructor
-     *
-     * @param numOfLabels the number of labels
-     * @param beta the beta parameter
-     */
-    public MicroFMeasure(int numOfLabels, double beta) {
-        super(numOfLabels, beta);
-    }
+	/**
+	 * Full constructor
+	 *
+	 * @param numOfLabels the number of labels
+	 * @param beta the beta parameter
+	 */
+	public MicroFMeasure(ConfidenceLevel confLevel, int numOfLabels, double beta)
+	{
+		super(confLevel, numOfLabels, beta);
+	}
 
-    public double getValue() {
-        double tp = Utils.sum(truePositives);
-        double fp = Utils.sum(falsePositives);
-        double fn = Utils.sum(falseNegatives);
-        return InformationRetrievalMeasures.fMeasure(tp, fp, fn, beta);
-    }
+	public MicroFMeasure(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		this(confLevel, numOfLabels, 1);
+	}
 
-    public String getName() {
-        return "Micro-averaged F-Measure";
-    }
+	public double getValue()
+	{
+		double tp = Utils.sum(truePositives);
+		double fp = Utils.sum(falsePositives);
+		double fn = Utils.sum(falseNegatives);
+		return InformationRetrievalMeasures.fMeasure(tp, fp, fn, beta);
+	}
+
+	public String getName()
+	{
+		return "Micro-averaged F-Measure" + confLevel.getName();
+	}
 }

@@ -42,8 +42,9 @@ public abstract class LabelBasedAveragePrecision extends ConfidenceMeasureBase
 	 *
 	 * @param numOfLabels the number of labels
 	 */
-	public LabelBasedAveragePrecision(int numOfLabels)
+	public LabelBasedAveragePrecision(ConfidenceLevel confLevel, int numOfLabels)
 	{
+		super(confLevel);
 		this.numOfLabels = numOfLabels;
 		confact = new ArrayList[numOfLabels];
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
@@ -53,7 +54,7 @@ public abstract class LabelBasedAveragePrecision extends ConfidenceMeasureBase
 	}
 
 	@Override
-	protected void updateConfidence(double[] confidences, boolean[] truth, boolean[] missingTruth)
+	protected void updateConfidence(Double[] confidence, Boolean[] truth)
 	{
 		throw new Error("not implemented, overwrite if required for " + this.getClass());
 	}

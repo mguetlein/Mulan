@@ -29,10 +29,19 @@ package mulan.evaluation.measure;
  */
 public class SubsetAccuracy extends ExampleBasedBipartitionMeasureBase
 {
+	public SubsetAccuracy(ConfidenceLevel confLevel)
+	{
+		super(confLevel);
+	}
+
+	public SubsetAccuracy()
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL);
+	}
 
 	public String getName()
 	{
-		return "Subset Accuracy";
+		return "Subset Accuracy" + confLevel.getName();
 	}
 
 	public double getIdealValue()
@@ -57,13 +66,13 @@ public class SubsetAccuracy extends ExampleBasedBipartitionMeasureBase
 	}
 
 	@Override
-	protected void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] isMissing)
+	protected void updateBipartition(Boolean[] bipartition, Boolean[] truth)
 	{
 		double value = 1;
 		boolean allMissing = true;
 		for (int i = 0; i < truth.length; i++)
 		{
-			if (!isMissing[i])
+			if (bipartition[i] != null || truth[i] != null)
 			{
 				allMissing = false;
 				if (bipartition[i] != truth[i])

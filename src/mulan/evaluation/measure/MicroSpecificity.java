@@ -28,25 +28,34 @@ import weka.core.Utils;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class MicroSpecificity extends LabelBasedSpecificity {
+public class MicroSpecificity extends LabelBasedSpecificity
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     *
-     * @param numOfLabels the number of labels
-     */
-    public MicroSpecificity(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public MicroSpecificity(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getValue() {
-        double tn = Utils.sum(trueNegatives);
-        double fp = Utils.sum(falsePositives);
-        double fn = Utils.sum(falseNegatives);
-        return InformationRetrievalMeasures.specificity(tn, fp, fn);
-    }
+	public MicroSpecificity(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
+	}
 
-    public String getName() {
-        return "Micro-averaged Specificity";
-    }
+	public double getValue()
+	{
+		double tn = Utils.sum(trueNegatives);
+		double fp = Utils.sum(falsePositives);
+		double fn = Utils.sum(falseNegatives);
+		return InformationRetrievalMeasures.specificity(tn, fp, fn);
+	}
+
+	public String getName()
+	{
+		return "Micro-averaged Specificity" + confLevel.getName();
+	}
 }

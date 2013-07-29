@@ -11,12 +11,12 @@ public class MacroMCC extends LabelBasedMCC implements MacroAverageMeasure
 	 */
 	public MacroMCC(int numOfLabels)
 	{
-		this(numOfLabels, false);
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels, false);
 	}
 
-	public MacroMCC(int numOfLabels, boolean weighted)
+	public MacroMCC(ConfidenceLevel confLevel, int numOfLabels, boolean weighted)
 	{
-		super(numOfLabels);
+		super(confLevel, numOfLabels);
 		this.weighted = weighted;
 	}
 
@@ -41,7 +41,7 @@ public class MacroMCC extends LabelBasedMCC implements MacroAverageMeasure
 
 	public String getName()
 	{
-		return "Macro-averaged MCC weighted:" + weighted;
+		return "Macro-averaged MCC weighted:" + weighted + confLevel.getName();
 	}
 
 	/**

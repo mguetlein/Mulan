@@ -26,24 +26,32 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2010.12.03
  */
-public abstract class ExampleBasedBipartitionMeasureBase extends BipartitionMeasureBase {
+public abstract class ExampleBasedBipartitionMeasureBase extends BipartitionMeasureBase
+{
 
-    /**
-     * The current sum of the measure
-     */
-    protected double sum;
-    /**
-     * The number of validation examples processed
-     */
-    protected int count;
+	/**
+	 * The current sum of the measure
+	 */
+	protected double sum;
+	/**
+	 * The number of validation examples processed
+	 */
+	protected int count;
 
-    public void reset() {
-        sum = 0;
-        count = 0;
-    }
+	public ExampleBasedBipartitionMeasureBase(ConfidenceLevel confLevel)
+	{
+		super(confLevel);
+	}
 
-    public double getValue() {
-        return sum / count;
-    }
+	public void reset()
+	{
+		sum = 0;
+		count = 0;
+	}
+
+	public double getValue()
+	{
+		return sum / count;
+	}
 
 }

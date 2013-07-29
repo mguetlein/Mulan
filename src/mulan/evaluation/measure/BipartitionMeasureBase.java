@@ -30,6 +30,10 @@ import mulan.core.ArgumentNullException;
  */
 public abstract class BipartitionMeasureBase extends MeasureBase
 {
+	public BipartitionMeasureBase(ConfidenceLevel confLevel)
+	{
+		super(confLevel);
+	}
 
 	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth)
 	{
@@ -47,21 +51,9 @@ public abstract class BipartitionMeasureBase extends MeasureBase
 	}
 
 	@Override
-	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	protected void updateInternal(Boolean[] bipartition, Boolean[] truth, Double[] confidence)
 	{
-		boolean[] bipartition = prediction.getBipartition();
-		if (bipartition == null)
-		{
-			throw new ArgumentNullException("Bipartition is null");
-		}
-		if (bipartition.length != truth.length)
-		{
-			throw new IllegalArgumentException("The dimensions of the "
-					+ "bipartition and the ground truth array do not match");
-		}
-		if (missingTruth.length != truth.length)
-			throw new IllegalArgumentException();
-		updateBipartition(bipartition, truth, missingTruth);
+		updateBipartition(bipartition, truth);
 	}
 
 	/**
@@ -72,7 +64,7 @@ public abstract class BipartitionMeasureBase extends MeasureBase
 	 */
 	protected abstract void updateBipartition(boolean[] bipartition, boolean[] truth);
 
-	protected void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] missingTruth)
+	protected void updateBipartition(Boolean[] bipartition, Boolean[] truth)
 	{
 		throw new Error("not implemented, overwrite if required for " + this.getClass());
 	}

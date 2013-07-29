@@ -1,6 +1,8 @@
 package mulan.evaluation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -11,11 +13,15 @@ import java.util.logging.Logger;
 import mulan.classifier.MultiLabelLearner;
 import mulan.classifier.MultiLabelOutput;
 import mulan.data.MultiLabelInstances;
+import mulan.evaluation.measure.ConfidenceLevel;
+import mulan.evaluation.measure.ConfidenceLevelProvider;
 import mulan.evaluation.measure.HammingLoss;
 import mulan.evaluation.measure.MacroAUC;
 import mulan.evaluation.measure.MacroAccuracy;
 import mulan.evaluation.measure.MacroFMeasure;
 import mulan.evaluation.measure.MacroMCC;
+import mulan.evaluation.measure.MacroNegativePredictiveValue;
+import mulan.evaluation.measure.MacroPrecision;
 import mulan.evaluation.measure.MacroRecall;
 import mulan.evaluation.measure.MacroSpecificity;
 import mulan.evaluation.measure.Measure;
@@ -162,36 +168,43 @@ public class MissingCapableEvaluator extends Evaluator
 			// add bipartition-based measures if applicable
 			if (prediction.hasBipartition())
 			{
-				// add example-based measures
-				measures.add(new HammingLoss());
-				measures.add(new SubsetAccuracy());
-				//				measures.add(new ExampleBasedPrecision());
-				//				measures.add(new ExampleBasedRecall());
-				//				measures.add(new ExampleBasedFMeasure());
-				//				measures.add(new ExampleBasedAccuracy());
+				for (ConfidenceLevel confLevel : ConfidenceLevelProvider.LEVELS)
+				{
+					// add example-based measures
+					measures.add(new HammingLoss(confLevel));
+					measures.add(new SubsetAccuracy(confLevel));
+					//				measures.add(new ExampleBasedPrecision());
+					//				measures.add(new ExampleBasedRecall());
+					//				measures.add(new ExampleBasedFMeasure());
+					//				measures.add(new ExampleBasedAccuracy());
 
-				int numOfLabels = data.getNumLabels();
-				measures.add(new MicroAccuracy(numOfLabels));
-				measures.add(new MacroAccuracy(numOfLabels));
-				measures.add(new MacroAccuracy(numOfLabels, true));
+					int numOfLabels = data.getNumLabels();
+					measures.add(new MicroAccuracy(confLevel, numOfLabels));
+					measures.add(new MacroAccuracy(confLevel, numOfLabels, false));
+					measures.add(new MacroAccuracy(confLevel, numOfLabels, true));
 
-				measures.add(new MicroFMeasure(numOfLabels));
-				measures.add(new MacroFMeasure(numOfLabels));
-				measures.add(new MacroFMeasure(numOfLabels, true));
+					measures.add(new MicroFMeasure(confLevel, numOfLabels));
+					measures.add(new MacroFMeasure(confLevel, numOfLabels, false));
+					measures.add(new MacroFMeasure(confLevel, numOfLabels, true));
 
-				measures.add(new MicroAUC(numOfLabels));
-				measures.add(new MacroAUC(numOfLabels));
-				measures.add(new MacroAUC(numOfLabels, true));
+					measures.add(new MicroAUC(confLevel, numOfLabels));
+					measures.add(new MacroAUC(confLevel, numOfLabels, false));
+					measures.add(new MacroAUC(confLevel, numOfLabels, true));
 
-				measures.add(new MicroMCC(numOfLabels));
-				measures.add(new MacroMCC(numOfLabels));
-				measures.add(new MacroMCC(numOfLabels, true));
+					measures.add(new MicroMCC(confLevel, numOfLabels));
+					measures.add(new MacroMCC(confLevel, numOfLabels, false));
+					measures.add(new MacroMCC(confLevel, numOfLabels, true));
 
-				measures.add(new MicroRecall(numOfLabels));
-				measures.add(new MacroRecall(numOfLabels));
+					measures.add(new MicroRecall(confLevel, numOfLabels));
+					measures.add(new MacroRecall(confLevel, numOfLabels));
 
-				measures.add(new MicroSpecificity(numOfLabels));
-				measures.add(new MacroSpecificity(numOfLabels));
+					measures.add(new MicroSpecificity(confLevel, numOfLabels));
+					measures.add(new MacroSpecificity(confLevel, numOfLabels));
+
+					measures.add(new MacroPrecision(confLevel, numOfLabels));
+					measures.add(new MacroNegativePredictiveValue(confLevel, numOfLabels));
+				}
+				//				measures.add(new MacroPercentInsideAD(numOfLabels));
 			}
 			// add ranking-based measures if applicable
 			if (prediction.hasRanking())
@@ -222,6 +235,28 @@ public class MissingCapableEvaluator extends Evaluator
 		return this.evaluate(learner, data, measures);
 	}
 
+	public static double updateConf(boolean prediction, double conf, double appDomain)
+	{
+		if (appDomain == 0.0)
+			return 0.5;
+		if (appDomain == 1.0)
+			return conf;
+		double confInclAppDomain;
+		if (prediction)
+		{
+			double confN = Math.max(0, conf - 0.5) * 2.0;
+			double confInclAppDomainN = confN * appDomain;
+			confInclAppDomain = confInclAppDomainN * 0.5 + 0.5;
+		}
+		else
+		{
+			double confN = conf * 2.0;
+			double confInclAppDomainN = confN * appDomain;
+			confInclAppDomain = confInclAppDomainN * 0.5;
+		}
+		return confInclAppDomain;
+	}
+
 	@Override
 	public Evaluation evaluate(final MultiLabelLearner learner, final MultiLabelInstances data,
 			final List<Measure> measures) throws IllegalArgumentException, Exception
@@ -246,6 +281,9 @@ public class MissingCapableEvaluator extends Evaluator
 		final Set<Measure> failed = new HashSet<Measure>();
 		final Instances testData = data.getDataSet();
 		final int numInstances = testData.numInstances();
+		int numNotMissing[] = new int[trueLabels.length];
+		int numInsideAD[] = new int[trueLabels.length];
+
 		for (int instanceIndex = 0; instanceIndex < numInstances; instanceIndex++)
 		{
 			final Instance instance = testData.instance(instanceIndex);
@@ -262,22 +300,60 @@ public class MissingCapableEvaluator extends Evaluator
 			final MultiLabelOutput output = learner.makePrediction(instance);
 			trueLabels = MissingCapableEvaluator.getTrueLabels(instance, numLabels, labelIndices);
 
-			if (tracker != null)
-				for (int labelIndex = 0; labelIndex < trueLabels.length; labelIndex++)
-					if (!isMissing[labelIndex])
-						tracker.update(globalInstanceIndex, labelIndex, trueLabels[labelIndex],
-								output.getBipartition()[labelIndex] == trueLabels[labelIndex]);
+			double[] appDomainProb = new double[output.getBipartition().length];
+			if (appDomain != null)
+				appDomainProb = appDomain.getApplicabilityDomainPropability(instance);
+			else
+				Arrays.fill(appDomainProb, 1.0);
 
-			//			{
-			//				MultiLabelOutput prediction = MissingCapableEvaluator.getOutputForKnown(output, isMissing);
-			//				boolean truth[] = MissingCapableEvaluator.getCutBoolean(trueLabels, isMissing);
-			//				for (int i = 0; i < truth.length; i++)
-			//				{
-			//					if (truth[i] == prediction.getBipartition()[i])
-			//						correct++;
-			//					total++;
-			//				}
-			//			}
+			boolean[] insideAppDomain = new boolean[output.getBipartition().length];
+			//			double[] confInclAppDomain = new double[output.getBipartition().length];
+			for (int l = 0; l < trueLabels.length; l++)
+			{
+				insideAppDomain[l] = appDomainProb[l] > 0;
+				//				confInclAppDomain[l] = updateConf(output.getBipartition()[l], output.getConfidences()[l],
+				//						appDomainProb[l]);
+			}
+
+			if (tracker != null)
+				for (int l = 0; l < trueLabels.length; l++)
+					if (!isMissing[l])
+						tracker.update(globalInstanceIndex, l, trueLabels[l],
+								output.getBipartition()[l] == trueLabels[l], output.getConfidences()[l],
+								appDomainProb[l], 0.0);//confInclAppDomain[l]);
+
+			//			for (int l = 0; l < trueLabels.length; l++)
+			//				output.getConfidences()[l] = confInclAppDomain[l];
+
+			for (int l = 0; l < trueLabels.length; l++)
+				if (!isMissing[l])
+				{
+					numNotMissing[l]++;
+					if (insideAppDomain[l])
+						numInsideAD[l]++;
+				}
+
+			HashMap<ConfidenceLevel, Boolean[]> bipartition = new HashMap<ConfidenceLevel, Boolean[]>();
+			HashMap<ConfidenceLevel, Boolean[]> truth = new HashMap<ConfidenceLevel, Boolean[]>();
+			HashMap<ConfidenceLevel, Double[]> confidence = new HashMap<ConfidenceLevel, Double[]>();
+			for (ConfidenceLevel conf : ConfidenceLevelProvider.LEVELS)
+			{
+				Boolean[] b = new Boolean[trueLabels.length];
+				Boolean[] t = new Boolean[trueLabels.length];
+				Double[] c = new Double[trueLabels.length];
+				for (int i = 0; i < c.length; i++)
+				{
+					if (!isMissing[i] && insideAppDomain[i] && conf.isInside(output.getConfidences()[i]))
+					{
+						b[i] = output.getBipartition()[i];
+						t[i] = trueLabels[i];
+						c[i] = output.getConfidences()[i];
+					}
+				}
+				bipartition.put(conf, b);
+				truth.put(conf, t);
+				confidence.put(conf, c);
+			}
 
 			final Iterator<Measure> it = measures.iterator();
 
@@ -291,7 +367,8 @@ public class MissingCapableEvaluator extends Evaluator
 						//						m.update(MissingCapableEvaluator.getOutputForKnown(output, isMissing),
 						//								MissingCapableEvaluator.getCutBoolean(trueLabels, isMissing));
 
-						m.update(output, trueLabels, isMissing);
+						m.update(bipartition.get(m.getConfidenceLevel()), truth.get(m.getConfidenceLevel()),
+								confidence.get(m.getConfidenceLevel()));
 					}
 					catch (final Exception ex)
 					{
@@ -304,11 +381,19 @@ public class MissingCapableEvaluator extends Evaluator
 		//		System.err.println(total + " predictions of non-nil values");
 		//		System.err.println("Correct: " + correct + " " + StringUtil.formatDouble(correct / (double) total));
 
-		return new Evaluation(measures, data);
+		double[] pctInsideAD = new double[trueLabels.length];
+		for (int i = 0; i < pctInsideAD.length; i++)
+			if (numNotMissing[i] == 0)
+				pctInsideAD[i] = Double.NaN;
+			else
+				pctInsideAD[i] = numInsideAD[i] / (double) numNotMissing[i];
+
+		return new Evaluation(measures, data, pctInsideAD);
 	}
 
 	public void setSinglePredictionTracker(SinglePredictionTracker tracker)
 	{
 		this.tracker = tracker;
 	}
+
 }

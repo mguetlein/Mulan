@@ -67,7 +67,9 @@ public interface Measure
 	 */
 	void update(MultiLabelOutput prediction, boolean[] truth);
 
-	void update(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth);
+	void update(Boolean[] bipartition, Boolean[] truth, Double[] confidence);
+
+	ConfidenceLevel getConfidenceLevel();
 
 	/**
 	 * Creates a deep copy of the given measure using serialization.

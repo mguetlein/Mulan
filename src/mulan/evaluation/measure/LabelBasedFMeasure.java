@@ -26,35 +26,39 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2010.12.31
  */
-public abstract class LabelBasedFMeasure extends LabelBasedBipartitionMeasureBase {
+public abstract class LabelBasedFMeasure extends LabelBasedBipartitionMeasureBase
+{
 
-    /**
-     * the parameter for combining precision and recall
-     */
-    protected final double beta;
+	/**
+	 * the parameter for combining precision and recall
+	 */
+	protected final double beta;
 
-    /**
-     * Constructs a new object with given number of labels
-     *
-     * @param numOfLabels the number of labels
-     */
-    public LabelBasedFMeasure(int numOfLabels) {
-        this(numOfLabels, 1);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public LabelBasedFMeasure(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels, 1);
+	}
 
-    /**
-     * Constructs a new object with given number of labels and beta parameter
-     *
-     * @param numOfLabels the number of labels
-     * @param beta the beta parameter
-     */
-    public LabelBasedFMeasure(int numOfLabels, double beta) {
-        super(numOfLabels);
-        this.beta = beta;
-    }
+	/**
+	 * Constructs a new object with given number of labels and beta parameter
+	 *
+	 * @param numOfLabels the number of labels
+	 * @param beta the beta parameter
+	 */
+	public LabelBasedFMeasure(ConfidenceLevel confLevel, int numOfLabels, double beta)
+	{
+		super(confLevel, numOfLabels);
+		this.beta = beta;
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
+	public double getIdealValue()
+	{
+		return 1;
+	}
 
 }

@@ -55,13 +55,18 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 
 	public MacroAUC(int numOfLabels, boolean weighted)
 	{
-		super(numOfLabels);
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels, weighted);
+	}
+
+	public MacroAUC(ConfidenceLevel confLevel, int numOfLabels, boolean weighted)
+	{
+		super(confLevel, numOfLabels);
 		this.weighted = weighted;
 	}
 
 	public String getName()
 	{
-		return "Macro-averaged AUC weighted:" + weighted;
+		return "Macro-averaged AUC weighted:" + weighted + confLevel.getName();
 	}
 
 	public double getValue()
@@ -81,7 +86,8 @@ public class MacroAUC extends LabelBasedAUC implements MacroAverageMeasure
 			}
 		}
 		if (sum == 0)
-			throw new IllegalStateException("Make sure to handle MacroAUC NaNs properly");
+			return Double.NaN;
+		//			throw new IllegalStateException("Make sure to handle MacroAUC NaNs properly");
 		return sum / count;
 	}
 

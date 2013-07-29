@@ -55,8 +55,9 @@ public abstract class LabelBasedBipartitionMeasureBase extends BipartitionMeasur
 	 *
 	 * @param aNumOfLabels the number of labels
 	 */
-	public LabelBasedBipartitionMeasureBase(int aNumOfLabels)
+	public LabelBasedBipartitionMeasureBase(ConfidenceLevel confLevel, int aNumOfLabels)
 	{
+		super(confLevel);
 		numOfLabels = aNumOfLabels;
 		falseNegatives = new double[numOfLabels];
 		truePositives = new double[numOfLabels];
@@ -102,11 +103,12 @@ public abstract class LabelBasedBipartitionMeasureBase extends BipartitionMeasur
 				+ trueNegatives[labelIndex];
 	}
 
-	public void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] isMissing)
+	@Override
+	public void updateBipartition(Boolean[] bipartition, Boolean[] truth)
 	{
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
 		{
-			if (!isMissing[labelIndex])
+			if (bipartition[labelIndex] != null && truth[labelIndex] != null)
 			{
 				boolean actual = truth[labelIndex];
 				boolean predicted = bipartition[labelIndex];
@@ -135,6 +137,26 @@ public abstract class LabelBasedBipartitionMeasureBase extends BipartitionMeasur
 				}
 			}
 		}
+	}
+
+	public double getTP(int l)
+	{
+		return truePositives[l];
+	}
+
+	public double getFP(int l)
+	{
+		return falsePositives[l];
+	}
+
+	public double getTN(int l)
+	{
+		return trueNegatives[l];
+	}
+
+	public double getFN(int l)
+	{
+		return falseNegatives[l];
 	}
 
 	public void reset()

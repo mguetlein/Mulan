@@ -64,6 +64,7 @@ import mulan.evaluation.measure.SubsetAccuracy;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import appDomain.MLCApplicabilityDomain;
 
 /**
  * Evaluator - responsible for generating evaluation data
@@ -339,6 +340,13 @@ public class Evaluator
 		this.randomImputation = random;
 	}
 
+	MLCApplicabilityDomain appDomain;
+
+	public void setApplicabilityDomain(MLCApplicabilityDomain appDomain)
+	{
+		this.appDomain = appDomain;
+	}
+
 	private MultipleEvaluation innerCrossValidate(MultiLabelLearner learner, MultiLabelInstances data,
 			boolean hasMeasures, List<Measure> measures, int someFolds)
 	{
@@ -443,6 +451,10 @@ public class Evaluator
 				MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());
 				MultiLabelLearner clone = learner.makeCopy();
 				clone.build(mlTrain);
+
+				if (appDomain != null)
+					appDomain.init(mlTrain);
+
 				if (hasMeasures)
 					evaluation[i] = evaluate(clone, mlTest, measures);
 				else

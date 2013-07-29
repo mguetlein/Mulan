@@ -28,25 +28,34 @@ import weka.core.Utils;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class MicroRecall extends LabelBasedRecall {
+public class MicroRecall extends LabelBasedRecall
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     *
-     * @param numOfLabels the number of labels
-     */
-    public MicroRecall(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public MicroRecall(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getValue() {
-        double tp = Utils.sum(truePositives);
-        double fp = Utils.sum(falsePositives);
-        double fn = Utils.sum(falseNegatives);
-        return InformationRetrievalMeasures.recall(tp, fp, fn);
-    }
+	public MicroRecall(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
+	}
 
-    public String getName() {
-        return "Micro-averaged Recall";
-    }
+	public double getValue()
+	{
+		double tp = Utils.sum(truePositives);
+		double fp = Utils.sum(falsePositives);
+		double fn = Utils.sum(falseNegatives);
+		return InformationRetrievalMeasures.recall(tp, fp, fn);
+	}
+
+	public String getName()
+	{
+		return "Micro-averaged Recall" + confLevel.getName();
+	}
 }

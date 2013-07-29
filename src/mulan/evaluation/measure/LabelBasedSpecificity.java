@@ -26,19 +26,22 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2011.09.06
  */
-public abstract class LabelBasedSpecificity extends LabelBasedBipartitionMeasureBase {
+public abstract class LabelBasedSpecificity extends LabelBasedBipartitionMeasureBase
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     *
-     * @param numOfLabels the number of labels
-     */
-    public LabelBasedSpecificity(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public LabelBasedSpecificity(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
+	public double getIdealValue()
+	{
+		return 1;
+	}
 
 }

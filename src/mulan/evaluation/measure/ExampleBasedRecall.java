@@ -26,35 +26,57 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class ExampleBasedRecall extends ExampleBasedBipartitionMeasureBase {
+public class ExampleBasedRecall extends ExampleBasedBipartitionMeasureBase
+{
 
-    public String getName() {
-        return "Example-Based Recall";
-    }
+	public ExampleBasedRecall(ConfidenceLevel confLevel)
+	{
+		super(confLevel);
+	}
 
-    @Override
-    protected void updateBipartition(boolean[] bipartition, boolean[] truth) {
-        double tp = 0;
-        double fp = 0;
-        double fn = 0;
-        for (int i = 0; i < truth.length; i++) {
-            if (bipartition[i]) {
-                if (truth[i]) {
-                    tp++;
-                } else {
-                    fp++;
-                }
-            } else {
-                if (truth[i]) {
-                    fn++;
-                }
-            }
-        }
-        sum += InformationRetrievalMeasures.recall(tp, fp, fn);
-        count++;
-    }
+	public ExampleBasedRecall()
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL);
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
+	public String getName()
+	{
+		return "Example-Based Recall" + confLevel.getName();
+	}
+
+	@Override
+	protected void updateBipartition(boolean[] bipartition, boolean[] truth)
+	{
+		double tp = 0;
+		double fp = 0;
+		double fn = 0;
+		for (int i = 0; i < truth.length; i++)
+		{
+			if (bipartition[i])
+			{
+				if (truth[i])
+				{
+					tp++;
+				}
+				else
+				{
+					fp++;
+				}
+			}
+			else
+			{
+				if (truth[i])
+				{
+					fn++;
+				}
+			}
+		}
+		sum += InformationRetrievalMeasures.recall(tp, fp, fn);
+		count++;
+	}
+
+	public double getIdealValue()
+	{
+		return 1;
+	}
 }

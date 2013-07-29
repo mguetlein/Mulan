@@ -32,6 +32,17 @@ import weka.core.SerializedObject;
  */
 public abstract class MeasureBase implements Measure, Serializable
 {
+	protected ConfidenceLevel confLevel;
+
+	public MeasureBase()
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL);
+	}
+
+	public MeasureBase(ConfidenceLevel confLevel)
+	{
+		this.confLevel = confLevel;
+	}
 
 	public final void update(MultiLabelOutput prediction, boolean[] truth)
 	{
@@ -46,17 +57,16 @@ public abstract class MeasureBase implements Measure, Serializable
 		updateInternal(prediction, truth);
 	}
 
-	public final void update(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	@Override
+	public final void update(Boolean[] bipartition, Boolean[] truth, Double[] confidence)
 	{
-		if (prediction == null)
-		{
-			throw new ArgumentNullException("Prediction is null");
-		}
-		if (truth == null)
-		{
-			throw new ArgumentNullException("Ground truth is null");
-		}
-		updateInternal(prediction, truth, missingTruth);
+		updateInternal(bipartition, truth, confidence);
+	}
+
+	@Override
+	public ConfidenceLevel getConfidenceLevel()
+	{
+		return confLevel;
 	}
 
 	/**
@@ -86,7 +96,7 @@ public abstract class MeasureBase implements Measure, Serializable
 	 */
 	protected abstract void updateInternal(MultiLabelOutput prediction, boolean[] truth);
 
-	protected abstract void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth);
+	protected abstract void updateInternal(Boolean[] bipartition, Boolean[] truth, Double[] confidence);
 
 	public Measure makeCopy() throws Exception
 	{

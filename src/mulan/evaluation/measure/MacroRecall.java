@@ -26,41 +26,56 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class MacroRecall extends LabelBasedRecall implements MacroAverageMeasure {
+public class MacroRecall extends LabelBasedRecall implements MacroAverageMeasure
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     * 
-     * @param numOfLabels the number of labels
-     */
-    public MacroRecall(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 * 
+	 * @param numOfLabels the number of labels
+	 */
+	public MacroRecall(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getValue() {
-        double sum = 0;
-        int count = 0;
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
-            sum += InformationRetrievalMeasures.recall(truePositives[labelIndex], falsePositives[labelIndex], falseNegatives[labelIndex]);
-            count++;
-        }
-        return sum / count;
-    }
+	public MacroRecall(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
+	}
 
-    public String getName() {
-        return "Macro-averaged Recall";
-    }
-    
-    /**
-     * Returns the recall for a label
-     *
-     * @param labelIndex the index of a label (starting from 0)
-     * @return the recall for the given label
-     */
-    public double getValue(int labelIndex) {
-        return InformationRetrievalMeasures.recall(truePositives[labelIndex],
-                falsePositives[labelIndex],
-                falseNegatives[labelIndex]);
-    }    
-    
+	public double getValue()
+	{
+		double sum = 0;
+		int count = 0;
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			double v = InformationRetrievalMeasures.recall(truePositives[labelIndex], falsePositives[labelIndex],
+					falseNegatives[labelIndex]);
+			if (!Double.isNaN(v))
+			{
+				sum += v;
+				count++;
+			}
+		}
+		return sum / count;
+	}
+
+	public String getName()
+	{
+		return "Macro-averaged Recall" + confLevel.getName();
+	}
+
+	/**
+	 * Returns the recall for a label
+	 *
+	 * @param labelIndex the index of a label (starting from 0)
+	 * @return the recall for the given label
+	 */
+	public double getValue(int labelIndex)
+	{
+		return InformationRetrievalMeasures.recall(truePositives[labelIndex], falsePositives[labelIndex],
+				falseNegatives[labelIndex]);
+	}
+
 }

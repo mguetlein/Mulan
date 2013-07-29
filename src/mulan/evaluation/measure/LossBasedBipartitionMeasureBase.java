@@ -33,14 +33,20 @@ public abstract class LossBasedBipartitionMeasureBase extends ExampleBasedBipart
 	// a bipartition loss function
 	private final BipartitionLossFunction loss;
 
+	public LossBasedBipartitionMeasureBase(BipartitionLossFunction loss)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, loss);
+	}
+
 	/**
 	 * Creates a loss-based bipartition measure
 	 *
 	 * @param aLoss a bipartition loss function
 	 */
-	public LossBasedBipartitionMeasureBase(BipartitionLossFunction aLoss)
+	public LossBasedBipartitionMeasureBase(ConfidenceLevel confLevel, BipartitionLossFunction aLoss)
 	{
-		loss = aLoss;
+		super(confLevel);
+		this.loss = aLoss;
 	}
 
 	@Override
@@ -50,15 +56,16 @@ public abstract class LossBasedBipartitionMeasureBase extends ExampleBasedBipart
 		count++;
 	}
 
-	public void updateBipartition(boolean[] bipartition, boolean[] truth, boolean[] isMissing)
+	@Override
+	public void updateBipartition(Boolean[] bipartition, Boolean[] truth)
 	{
-		sum += loss.computeLoss(bipartition, truth, isMissing);
+		sum += loss.computeLoss(bipartition, truth);
 		count++;
 	}
 
 	public String getName()
 	{
-		return loss.getName();
+		return loss.getName() + confLevel.getName();
 	}
 
 	public double getIdealValue()

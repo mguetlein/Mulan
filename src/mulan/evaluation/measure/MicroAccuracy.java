@@ -10,9 +10,9 @@ public class MicroAccuracy extends LabelBasedAccuracy
 	 *
 	 * @param numOfLabels the number of labels
 	 */
-	public MicroAccuracy(int numOfLabels)
+	public MicroAccuracy(ConfidenceLevel confLevel, int numOfLabels)
 	{
-		super(numOfLabels);
+		super(confLevel, numOfLabels);
 	}
 
 	public double getValue()
@@ -26,6 +26,6 @@ public class MicroAccuracy extends LabelBasedAccuracy
 
 	public String getName()
 	{
-		return "Micro-averaged Accuracy";
+		return "Micro-averaged Accuracy" + confLevel.getName();
 	}
 }

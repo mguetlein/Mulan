@@ -26,34 +26,42 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2010.12.04
  */
-public class Coverage extends RankingMeasureBase {
+public class Coverage extends RankingMeasureBase
+{
 
-    public String getName() {
-        return "Coverage";
-    }
+	public String getName()
+	{
+		return "Coverage" + confLevel.getName();
+	}
 
-    @Override
-    public double getIdealValue() {
-        return 1;
-    }
+	@Override
+	public double getIdealValue()
+	{
+		return 1;
+	}
 
-    protected void updateRanking(int[] ranking, boolean[] trueLabels) {
-        int howDeep = 0;
-        int numLabels = trueLabels.length;
-        for (int rank = numLabels; rank >= 1; rank--) {
-            int indexOfRank;
-            for (indexOfRank = 0; indexOfRank < numLabels; indexOfRank++) {
-                if (ranking[indexOfRank] == rank) {
-                    break;
-                }
-            }
-            if (trueLabels[indexOfRank]) {
-                howDeep = rank - 1;
-                break;
-            }
-        }
+	protected void updateRanking(int[] ranking, boolean[] trueLabels)
+	{
+		int howDeep = 0;
+		int numLabels = trueLabels.length;
+		for (int rank = numLabels; rank >= 1; rank--)
+		{
+			int indexOfRank;
+			for (indexOfRank = 0; indexOfRank < numLabels; indexOfRank++)
+			{
+				if (ranking[indexOfRank] == rank)
+				{
+					break;
+				}
+			}
+			if (trueLabels[indexOfRank])
+			{
+				howDeep = rank - 1;
+				break;
+			}
+		}
 
-        sum += howDeep;
-        count++;
-    }
+		sum += howDeep;
+		count++;
+	}
 }

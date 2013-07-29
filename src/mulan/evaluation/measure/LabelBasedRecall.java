@@ -26,19 +26,22 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public abstract class LabelBasedRecall extends LabelBasedBipartitionMeasureBase {
+public abstract class LabelBasedRecall extends LabelBasedBipartitionMeasureBase
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     *
-     * @param numOfLabels the number of labels
-     */
-    public LabelBasedRecall(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public LabelBasedRecall(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
-    
+	public double getIdealValue()
+	{
+		return 1;
+	}
+
 }

@@ -44,8 +44,9 @@ public abstract class LabelBasedAUC extends ConfidenceMeasureBase
 	 * 
 	 * @param numOfLabels the number of labels
 	 */
-	public LabelBasedAUC(int numOfLabels)
+	public LabelBasedAUC(ConfidenceLevel confLevel, int numOfLabels)
 	{
+		super(confLevel);
 		this.numOfLabels = numOfLabels;
 		m_Predictions = new FastVector[numOfLabels];
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
@@ -95,11 +96,11 @@ public abstract class LabelBasedAUC extends ConfidenceMeasureBase
 	}
 
 	@Override
-	protected void updateConfidence(double[] confidences, boolean[] truth, boolean[] missingTruth)
+	protected void updateConfidence(Double[] confidence, Boolean[] truth)
 	{
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
 		{
-			if (!missingTruth[labelIndex])
+			if (confidence[labelIndex] != null && truth[labelIndex] != null)
 			{
 				int classValue;
 				boolean actual = truth[labelIndex];
@@ -113,7 +114,7 @@ public abstract class LabelBasedAUC extends ConfidenceMeasureBase
 				}
 
 				double[] dist = new double[2];
-				dist[1] = confidences[labelIndex];
+				dist[1] = confidence[labelIndex];
 				dist[0] = 1 - dist[1];
 
 				m_Predictions[labelIndex].addElement(new NominalPrediction(classValue, dist, 1));

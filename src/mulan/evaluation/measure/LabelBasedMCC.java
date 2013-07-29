@@ -8,9 +8,9 @@ public abstract class LabelBasedMCC extends LabelBasedBipartitionMeasureBase
 	 *
 	 * @param numOfLabels the number of labels
 	 */
-	public LabelBasedMCC(int numOfLabels)
+	public LabelBasedMCC(ConfidenceLevel confLevel, int numOfLabels)
 	{
-		super(numOfLabels);
+		super(confLevel, numOfLabels);
 	}
 
 	public double getIdealValue()

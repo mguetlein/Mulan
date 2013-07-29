@@ -26,99 +26,140 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class InformationRetrievalMeasures {
+public class InformationRetrievalMeasures
+{
 
-    /**
-     * Computation of F-measure based on tp, fp, fn and beta. We treat special
-     * cases with empty set predictions or/and ground truth as follows: (i) if
-     * the algorithm outputs the empty set and the ground truth is the empty
-     * set, then we consider F equal to 1 (ii) if the algorithm outputs the
-     * empty set and the ground truth is not empty, then we consider F equal to
-     * 0 (iii) if the ground truth is empty and the algorithm does not output
-     * the empty set, then we consider F equal to 0 (iv) if neither the ground
-     * truth nor the algorithm's prediction is the empty set and their
-     * intersection is empty, then we consider F equal to 0.
-     *
-     * @param tp true positives
-     * @param fp false positives
-     * @param fn false negatives
-     * @param beta controls the relative importance of recall versus precision
-     * @return the value of the f-measure
-     */
-    public static double fMeasure(double tp, double fp, double fn, double beta) {
-        if (tp + fp + fn == 0) {
-            return 1;
-        }
-        double beta2 = beta * beta;
-        return ((beta2 + 1) * tp) / ((beta2 + 1) * tp + beta2 * fn + fp);
-    }
+	/**
+	 * Computation of F-measure based on tp, fp, fn and beta. We treat special
+	 * cases with empty set predictions or/and ground truth as follows: (i) if
+	 * the algorithm outputs the empty set and the ground truth is the empty
+	 * set, then we consider F equal to 1 (ii) if the algorithm outputs the
+	 * empty set and the ground truth is not empty, then we consider F equal to
+	 * 0 (iii) if the ground truth is empty and the algorithm does not output
+	 * the empty set, then we consider F equal to 0 (iv) if neither the ground
+	 * truth nor the algorithm's prediction is the empty set and their
+	 * intersection is empty, then we consider F equal to 0.
+	 *
+	 * @param tp true positives
+	 * @param fp false positives
+	 * @param fn false negatives
+	 * @param beta controls the relative importance of recall versus precision
+	 * @return the value of the f-measure
+	 */
+	public static double fMeasure(double tp, double fp, double fn, double beta)
+	{
+		if (tp + fp + fn == 0)
+		{
+			//return 1;
+			return Double.NaN;
+		}
+		double beta2 = beta * beta;
+		return ((beta2 + 1) * tp) / ((beta2 + 1) * tp + beta2 * fn + fp);
+	}
 
-    /**
-     * Computation of precision based on tp, fp and fn. We treat special cases
-     * with empty set predictions or/and ground truth as follows: (i) if the
-     * algorithm outputs the empty set and the ground truth is the empty set,
-     * then we consider precision equal to 1 (ii) if the algorithm outputs the
-     * empty set and the ground truth is not empty, then we consider precision
-     * equal to 0.
-     *
-     * @param tp true positives
-     * @param fp false positives
-     * @param fn false negatives
-     * @return the value of precision
-     */
-    public static double precision(double tp, double fp, double fn) {
-        if (tp + fp + fn == 0) {
-            return 1;
-        }
-        if (tp + fp == 0) {
-            return 0;
-        }
-        return tp / (tp + fp);
-    }
+	/**
+	 * Computation of precision based on tp, fp and fn. We treat special cases
+	 * with empty set predictions or/and ground truth as follows: (i) if the
+	 * algorithm outputs the empty set and the ground truth is the empty set,
+	 * then we consider precision equal to 1 (ii) if the algorithm outputs the
+	 * empty set and the ground truth is not empty, then we consider precision
+	 * equal to 0.
+	 *
+	 * @param tp true positives
+	 * @param fp false positives
+	 * @param fn false negatives
+	 * @return the value of precision
+	 */
+	public static double precision(double tp, double fp, double fn)
+	{
+		//		if (tp + fp + fn == 0)
+		//		{
+		//			return 1;
+		//		}
+		//		if (tp + fp == 0)
+		//		{
+		//			return 0;
+		//		}
 
-    /**
-     * Computation of recall based on tp, fp and fn. We treat special cases with
-     * empty set predictions or/and ground truth as follows: (i) if the
-     * algorithm outputs the empty set and the ground truth is the empty set,
-     * then we consider recall equal to 1 (ii) if the algorithm does not output
-     * the empty set and the ground truth is empty, then we consider recall
-     * equal to 0.
-     *
-     * @param tp true positives
-     * @param fp false positives
-     * @param fn false negatives
-     * @return the value of recall
-     */
-    public static double recall(double tp, double fp, double fn) {
-        if (tp + fp + fn == 0) {
-            return 1;
-        }
-        if (tp + fn == 0) {
-            return 0;
-        }
-        return tp / (tp + fn);
-    }
+		//precision is the ratio of correct active predictions of all active predictions, if there are no active predictions, nothing can be computed 
+		if (tp + fp == 0)
+			return Double.NaN;
+		return tp / (tp + fp);
+	}
 
-    /**
-     * Computation of specificity based on tn, fp and fn. We treat special cases
-     * with empty set predictions or/and ground truth as follows: (i) if the
-     * algorithm outputs the set of all labels and the ground truth is the set
-     * of all labels, then we consider specificity equal to 1 (ii) if the ground
-     * truth is the set of all labels and the algorithm does not output the set
-     * of all labels, then we consider specificity equal to 0.
-     *
-     * @param tn true negatives
-     * @param fp false positives
-     * @param fn false negatives
-     * @return the value of specificity
-     */
-    public static double specificity(double tn, double fp, double fn) {
-        if (tn + fp + fn == 0) {
-            return 1;
-        }
-        if (tn + fp == 0) {
-            return 0;
-        }
-        return tn / (tn + fp);
-    }
+	/**
+	 * complementary to precision(=positivePredictiveValue)
+	 * 
+	 * @param tp
+	 * @param fp
+	 * @param fn
+	 * @return
+	 */
+	public static double negativePredictiveValue(double tn, double fn, double fp)
+	{
+		//npv is the ratio of correct inactive predictions of all inactive predictions, if there are no inactive predictions, nothing can be computed 
+		if (tn + fn == 0)
+			return Double.NaN;
+		return tn / (tn + fn);
+	}
+
+	/**
+	 * Computation of recall based on tp, fp and fn. We treat special cases with
+	 * empty set predictions or/and ground truth as follows: (i) if the
+	 * algorithm outputs the empty set and the ground truth is the empty set,
+	 * then we consider recall equal to 1 (ii) if the algorithm does not output
+	 * the empty set and the ground truth is empty, then we consider recall
+	 * equal to 0.
+	 *
+	 * @param tp true positives
+	 * @param fp false positives
+	 * @param fn false negatives
+	 * @return the value of recall
+	 */
+	public static double recall(double tp, double fp, double fn)
+	{
+		//		if (tp + fp + fn == 0)
+		//		{
+		//			return 1;
+		//		}
+		//		if (tp + fn == 0)
+		//		{
+		//			return 0;
+		//		}
+
+		// recall/sensitivity is the ratio of active predictions of all active instances, if there are no active instances, nothing can be computed
+		if (tp + fn == 0)
+			return Double.NaN;
+		return tp / (tp + fn);
+
+	}
+
+	/**
+	 * Computation of specificity based on tn, fp and fn. We treat special cases
+	 * with empty set predictions or/and ground truth as follows: (i) if the
+	 * algorithm outputs the set of all labels and the ground truth is the set
+	 * of all labels, then we consider specificity equal to 1 (ii) if the ground
+	 * truth is the set of all labels and the algorithm does not output the set
+	 * of all labels, then we consider specificity equal to 0.
+	 *
+	 * @param tn true negatives
+	 * @param fp false positives
+	 * @param fn false negatives
+	 * @return the value of specificity
+	 */
+	public static double specificity(double tn, double fp, double fn)
+	{
+		//		if (tn + fp + fn == 0)
+		//		{
+		//			return 1;
+		//		}
+		//		if (tn + fp == 0)
+		//		{
+		//			return 0;
+		//		}
+		// specificity is the ratio of is the ratio of inactive predictions of all inactive instances, if there are no inactive instances, nothing can be computed
+		if (tn + fp == 0)
+			return Double.NaN;
+		return tn / (tn + fp);
+	}
 }

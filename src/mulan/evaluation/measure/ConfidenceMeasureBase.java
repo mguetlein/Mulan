@@ -30,6 +30,10 @@ import mulan.core.ArgumentNullException;
  */
 public abstract class ConfidenceMeasureBase extends MeasureBase
 {
+	public ConfidenceMeasureBase(ConfidenceLevel confLevel)
+	{
+		super(confLevel);
+	}
 
 	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth)
 	{
@@ -47,19 +51,9 @@ public abstract class ConfidenceMeasureBase extends MeasureBase
 	}
 
 	@Override
-	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	protected void updateInternal(Boolean[] bipartition, Boolean[] truth, Double[] confidence)
 	{
-		double[] confidences = prediction.getConfidences();
-		if (confidences == null)
-		{
-			throw new ArgumentNullException("Bipartition is null");
-		}
-		if (confidences.length != truth.length)
-		{
-			throw new IllegalArgumentException("The dimensions of the "
-					+ "confidence array and the ground truth array do not match");
-		}
-		updateConfidence(confidences, truth, missingTruth);
+		updateConfidence(confidence, truth);
 	}
 
 	/**
@@ -70,5 +64,5 @@ public abstract class ConfidenceMeasureBase extends MeasureBase
 	 */
 	abstract protected void updateConfidence(double[] confidences, boolean[] truth);
 
-	abstract protected void updateConfidence(double[] confidences, boolean[] truth, boolean[] missingTruth);
+	abstract protected void updateConfidence(Double[] confidence, Boolean[] truth);
 }

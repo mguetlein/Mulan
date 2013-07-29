@@ -15,33 +15,28 @@
  */
 
 /*
- *    MacroSpecificity.java
+ *    MacroPrecision.java
  *    Copyright (C) 2009-2012 Aristotle University of Thessaloniki, Greece
  */
 package mulan.evaluation.measure;
 
 /**
- * Implementation of the macro-averaged recall measure.
- *
+ * Implementation of the macro-averaged precision measure.
+ * 
  * @author Grigorios Tsoumakas
- * @version 2012.05.29
+ * @version 2010.11.05
  */
-public class MacroSpecificity extends LabelBasedSpecificity implements MacroAverageMeasure
+public class MacroNegativePredictiveValue extends LabelBasedPrecision implements MacroAverageMeasure
 {
 
 	/**
-	 * Constructs a new object with given number of labels and strictness
-	 *
+	 * Constructs a new object with given number of labels
+	 * 
 	 * @param numOfLabels the number of labels
 	 */
-	public MacroSpecificity(ConfidenceLevel confLevel, int numOfLabels)
+	public MacroNegativePredictiveValue(ConfidenceLevel confLevel, int numOfLabels)
 	{
 		super(confLevel, numOfLabels);
-	}
-
-	public MacroSpecificity(int numOfLabels)
-	{
-		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
 	}
 
 	public double getValue()
@@ -50,8 +45,8 @@ public class MacroSpecificity extends LabelBasedSpecificity implements MacroAver
 		int count = 0;
 		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
 		{
-			double v = InformationRetrievalMeasures.specificity(trueNegatives[labelIndex], falsePositives[labelIndex],
-					falseNegatives[labelIndex]);
+			double v = InformationRetrievalMeasures.negativePredictiveValue(trueNegatives[labelIndex],
+					falseNegatives[labelIndex], falsePositives[labelIndex]);
 			if (!Double.isNaN(v))
 			{
 				sum += v;
@@ -63,18 +58,19 @@ public class MacroSpecificity extends LabelBasedSpecificity implements MacroAver
 
 	public String getName()
 	{
-		return "Macro-averaged Specificity" + confLevel.getName();
+		return "Macro-averaged NPV" + confLevel.getName();
 	}
 
 	/**
-	 * Returns the specificity for a label
+	 * Returns the precision for a label
 	 *
 	 * @param labelIndex the index of a label (starting from 0)
-	 * @return the specificity for the given label
+	 * @return the precision for the given label
 	 */
 	public double getValue(int labelIndex)
 	{
-		return InformationRetrievalMeasures.specificity(trueNegatives[labelIndex], falsePositives[labelIndex],
-				falseNegatives[labelIndex]);
+		return InformationRetrievalMeasures.negativePredictiveValue(trueNegatives[labelIndex],
+				falseNegatives[labelIndex], falsePositives[labelIndex]);
 	}
+
 }

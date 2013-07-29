@@ -59,15 +59,8 @@ public abstract class BipartitionLossFunctionBase implements BipartitionLossFunc
 		return computeLoss(bipartition, groundTruth);
 	}
 
-	public final double computeLoss(MultiLabelOutput prediction, boolean[] groundTruth, boolean[] isMissing)
-	{
-		boolean[] bipartition = prediction.getBipartition();
-		checkBipartition(bipartition);
-		checkLength(bipartition, groundTruth);
-		return computeLoss(bipartition, groundTruth, isMissing);
-	}
-
 	abstract public double computeLoss(boolean[] bipartition, boolean[] groundTruth);
 
-	abstract public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing);
+	@Override
+	abstract public double computeLoss(Boolean[] bipartition, Boolean[] groundTruth);
 }

@@ -26,41 +26,56 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2010.11.05
  */
-public class MacroPrecision extends LabelBasedPrecision implements MacroAverageMeasure {
+public class MacroPrecision extends LabelBasedPrecision implements MacroAverageMeasure
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     * 
-     * @param numOfLabels the number of labels
-     */
-    public MacroPrecision(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 * 
+	 * @param numOfLabels the number of labels
+	 */
+	public MacroPrecision(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getValue() {
-        double sum = 0;
-        int count = 0;
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
-            sum += InformationRetrievalMeasures.precision(truePositives[labelIndex], falsePositives[labelIndex], falseNegatives[labelIndex]);
-            count++;
-        }
-        return sum / count;
-    }
+	public MacroPrecision(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
+	}
 
-    public String getName() {
-        return "Macro-averaged Precision";
-    }
+	public double getValue()
+	{
+		double sum = 0;
+		int count = 0;
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			double v = InformationRetrievalMeasures.precision(truePositives[labelIndex], falsePositives[labelIndex],
+					falseNegatives[labelIndex]);
+			if (!Double.isNaN(v))
+			{
+				sum += v;
+				count++;
+			}
+		}
+		return sum / count;
+	}
 
-    /**
-     * Returns the precision for a label
-     *
-     * @param labelIndex the index of a label (starting from 0)
-     * @return the precision for the given label
-     */
-    public double getValue(int labelIndex) {
-        return InformationRetrievalMeasures.precision(truePositives[labelIndex],
-                falsePositives[labelIndex],
-                falseNegatives[labelIndex]);
-    }
+	public String getName()
+	{
+		return "Macro-averaged Precision" + confLevel.getName();
+	}
+
+	/**
+	 * Returns the precision for a label
+	 *
+	 * @param labelIndex the index of a label (starting from 0)
+	 * @return the precision for the given label
+	 */
+	public double getValue(int labelIndex)
+	{
+		return InformationRetrievalMeasures.precision(truePositives[labelIndex], falsePositives[labelIndex],
+				falseNegatives[labelIndex]);
+	}
 
 }

@@ -26,53 +26,74 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2012.05.29
  */
-public class ExampleBasedFMeasure extends ExampleBasedBipartitionMeasureBase {
+public class ExampleBasedFMeasure extends ExampleBasedBipartitionMeasureBase
+{
 
-    private final double beta;
+	private final double beta;
 
-    /**
-     * Creates a new object
-     *
-     */
-    public ExampleBasedFMeasure() {
-        this(1.0);
-    }
+	/**
+	 * Creates a new object
+	 *
+	 */
+	public ExampleBasedFMeasure()
+	{
+		this(1.0);
+	}
 
-    /**
-     * Creates a new object
-     *
-     * @param beta the beta parameter for precision and recall combination
-     */
-    public ExampleBasedFMeasure(double beta) {
-        this.beta = beta;
-    }
+	/**
+	 * Creates a new object
+	 *
+	 * @param beta the beta parameter for precision and recall combination
+	 */
+	public ExampleBasedFMeasure(double beta)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, beta);
+	}
 
-    public String getName() {
-        return "Example-Based F Measure";
-    }
+	public ExampleBasedFMeasure(ConfidenceLevel confLevel)
+	{
+		this(confLevel, 1.0);
+	}
 
-    public double getIdealValue() {
-        return 1;
-    }
+	public ExampleBasedFMeasure(ConfidenceLevel confLevel, double beta)
+	{
+		super(confLevel);
+		this.beta = beta;
+	}
 
-    @Override
-    protected void updateBipartition(boolean[] bipartition, boolean[] truth) {
-        double tp = 0;
-        double fp = 0;
-        double fn = 0;
-        for (int i = 0; i < truth.length; i++) {
-            if (bipartition[i] && truth[i]) {
-                tp++;
-            }
-            if (bipartition[i] && !truth[i]) {
-                fp++;
-            }
-            if (!bipartition[i] && truth[i]) {
-                fn++;
-            }
-        }
+	public String getName()
+	{
+		return "Example-Based F Measure" + confLevel.getName();
+	}
 
-        sum += InformationRetrievalMeasures.fMeasure(tp, fp, fn, beta);
-        count++;
-    }
+	public double getIdealValue()
+	{
+		return 1;
+	}
+
+	@Override
+	protected void updateBipartition(boolean[] bipartition, boolean[] truth)
+	{
+		double tp = 0;
+		double fp = 0;
+		double fn = 0;
+		for (int i = 0; i < truth.length; i++)
+		{
+			if (bipartition[i] && truth[i])
+			{
+				tp++;
+			}
+			if (bipartition[i] && !truth[i])
+			{
+				fp++;
+			}
+			if (!bipartition[i] && truth[i])
+			{
+				fn++;
+			}
+		}
+
+		sum += InformationRetrievalMeasures.fMeasure(tp, fp, fn, beta);
+		count++;
+	}
 }

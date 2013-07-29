@@ -76,7 +76,7 @@ public class HierarchicalLoss extends BipartitionLossFunctionBase
 	}
 
 	@Override
-	public double computeLoss(boolean[] bipartition, boolean[] groundTruth, boolean[] isMissing)
+	public double computeLoss(Boolean[] bipartition, Boolean[] groundTruth)
 	{
 		throw new Error("not implemented, overwrite if required for " + this.getClass());
 	}

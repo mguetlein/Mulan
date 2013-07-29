@@ -30,6 +30,7 @@ import mulan.core.ArgumentNullException;
  */
 public abstract class RankingMeasureBase extends MeasureBase
 {
+
 	/**
 	 * The current sum of the measure
 	 */
@@ -66,7 +67,7 @@ public abstract class RankingMeasureBase extends MeasureBase
 	}
 
 	@Override
-	protected void updateInternal(MultiLabelOutput prediction, boolean[] truth, boolean[] missingTruth)
+	protected void updateInternal(Boolean[] bipartition, Boolean[] truth, Double[] confidence)
 	{
 		throw new Error("not implemented, overwrite if required for " + this.getClass());
 	}

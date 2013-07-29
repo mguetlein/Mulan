@@ -26,13 +26,21 @@ package mulan.evaluation.measure;
  * @author Grigorios Tsoumakas
  * @version 2010.12.04
  */
-public class HammingLoss extends LossBasedBipartitionMeasureBase {
+public class HammingLoss extends LossBasedBipartitionMeasureBase
+{
 
-    /**
-     * Creates an instance of this object based on the corresponding loss
-     * function
-     */
-    public HammingLoss() {
-        super(new mulan.evaluation.loss.HammingLoss());
-    }
+	/**
+	 * Creates an instance of this object based on the corresponding loss
+	 * function
+	 */
+	public HammingLoss(ConfidenceLevel confLevel)
+	{
+		super(confLevel, new mulan.evaluation.loss.HammingLoss());
+	}
+
+	public HammingLoss()
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL);
+	}
+
 }

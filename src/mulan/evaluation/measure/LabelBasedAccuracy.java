@@ -8,9 +8,9 @@ public abstract class LabelBasedAccuracy extends LabelBasedBipartitionMeasureBas
 	 *
 	 * @param numOfLabels the number of labels
 	 */
-	public LabelBasedAccuracy(int numOfLabels)
+	public LabelBasedAccuracy(ConfidenceLevel confLevel, int numOfLabels)
 	{
-		super(numOfLabels);
+		super(confLevel, numOfLabels);
 	}
 
 	public double getIdealValue()

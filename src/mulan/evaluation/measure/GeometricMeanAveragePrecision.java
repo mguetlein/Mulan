@@ -26,33 +26,39 @@ package mulan.evaluation.measure;
  * @author Eleftherios Spyromitros-Xioufis
  * @version 2010.12.10
  */
-public class GeometricMeanAveragePrecision extends MeanAveragePrecision {
+public class GeometricMeanAveragePrecision extends MeanAveragePrecision
+{
 
-    /**
-     * Creates a new instance of this class
-     * 
-     * @param numOfLabels the number of labels
-     */
-    public GeometricMeanAveragePrecision(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Creates a new instance of this class
+	 * 
+	 * @param numOfLabels the number of labels
+	 */
+	public GeometricMeanAveragePrecision(int numOfLabels)
+	{
+		super(numOfLabels);
+	}
 
-    @Override
-    public String getName() {
-        return "Geometric Mean Average Precision";
-    }
+	@Override
+	public String getName()
+	{
+		return "Geometric Mean Average Precision" + confLevel.getName();
+	}
 
-    @Override
-    public double getValue() {
-        double product = 1;
-        for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++) {
-            product = product * getValue(labelIndex);
-        }
-        return Math.pow(product, 1.0 / numOfLabels);
-    }
+	@Override
+	public double getValue()
+	{
+		double product = 1;
+		for (int labelIndex = 0; labelIndex < numOfLabels; labelIndex++)
+		{
+			product = product * getValue(labelIndex);
+		}
+		return Math.pow(product, 1.0 / numOfLabels);
+	}
 
-    @Override
-    public double getIdealValue() {
-        return 1;
-    }
+	@Override
+	public double getIdealValue()
+	{
+		return 1;
+	}
 }

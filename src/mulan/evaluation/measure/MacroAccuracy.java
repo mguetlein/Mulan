@@ -9,14 +9,9 @@ public class MacroAccuracy extends LabelBasedAccuracy implements MacroAverageMea
 	 * 
 	 * @param numOfLabels the number of labels
 	 */
-	public MacroAccuracy(int numOfLabels)
+	public MacroAccuracy(ConfidenceLevel confLevel, int numOfLabels, boolean weighted)
 	{
-		this(numOfLabels, false);
-	}
-
-	public MacroAccuracy(int numOfLabels, boolean weighted)
-	{
-		super(numOfLabels);
+		super(confLevel, numOfLabels);
 		this.weighted = weighted;
 	}
 
@@ -41,7 +36,7 @@ public class MacroAccuracy extends LabelBasedAccuracy implements MacroAverageMea
 
 	public String getName()
 	{
-		return "Macro-averaged Accuracy weighted:" + weighted;
+		return "Macro-averaged Accuracy weighted:" + weighted + confLevel.getName();
 	}
 
 	/**

@@ -27,32 +27,37 @@ import mulan.evaluation.loss.RankingLossFunction;
  * @author Grigorios Tsoumakas
  * @version 2010.11.10
  */
-public abstract class LossBasedRankingMeasureBase extends RankingMeasureBase {
+public abstract class LossBasedRankingMeasureBase extends RankingMeasureBase
+{
 
-    // a ranking loss function
-    private final RankingLossFunction loss;
+	// a ranking loss function
+	private final RankingLossFunction loss;
 
-    /**
-     * Creates a loss-based ranking measure
-     *
-     * @param aLoss a ranking loss function
-     */
-    public LossBasedRankingMeasureBase(RankingLossFunction aLoss) {
-        loss = aLoss;
-    }
+	/**
+	 * Creates a loss-based ranking measure
+	 *
+	 * @param aLoss a ranking loss function
+	 */
+	public LossBasedRankingMeasureBase(RankingLossFunction aLoss)
+	{
+		loss = aLoss;
+	}
 
-    @Override
-    protected void updateRanking(int[] ranking, boolean[] truth) {
-        sum += loss.computeLoss(ranking, truth);
-        count++;
-    }
+	@Override
+	protected void updateRanking(int[] ranking, boolean[] truth)
+	{
+		sum += loss.computeLoss(ranking, truth);
+		count++;
+	}
 
-    public String getName() {
-        return loss.getName();
-    }
+	public String getName()
+	{
+		return loss.getName() + confLevel.getName();
+	}
 
-    public double getIdealValue() {
-        return 0;
-    }
+	public double getIdealValue()
+	{
+		return 0;
+	}
 
 }

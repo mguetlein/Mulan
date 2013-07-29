@@ -28,25 +28,34 @@ import weka.core.Utils;
  * @author Grigorios Tsoumakas
  * @version 2010.11.05
  */
-public class MicroPrecision extends LabelBasedPrecision {
+public class MicroPrecision extends LabelBasedPrecision
+{
 
-    /**
-     * Constructs a new object with given number of labels
-     *
-     * @param numOfLabels the number of labels
-     */
-    public MicroPrecision(int numOfLabels) {
-        super(numOfLabels);
-    }
+	/**
+	 * Constructs a new object with given number of labels
+	 *
+	 * @param numOfLabels the number of labels
+	 */
+	public MicroPrecision(ConfidenceLevel confLevel, int numOfLabels)
+	{
+		super(confLevel, numOfLabels);
+	}
 
-    public double getValue() {
-        double tp = Utils.sum(truePositives);
-        double fp = Utils.sum(falsePositives);
-        double fn = Utils.sum(falseNegatives);
-        return InformationRetrievalMeasures.precision(tp, fp, fn);
-    }
+	public MicroPrecision(int numOfLabels)
+	{
+		this(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL, numOfLabels);
+	}
 
-    public String getName() {
-        return "Micro-averaged Precision";
-    }
+	public double getValue()
+	{
+		double tp = Utils.sum(truePositives);
+		double fp = Utils.sum(falsePositives);
+		double fn = Utils.sum(falseNegatives);
+		return InformationRetrievalMeasures.precision(tp, fp, fn);
+	}
+
+	public String getName()
+	{
+		return "Micro-averaged Precision" + confLevel.getName();
+	}
 }
