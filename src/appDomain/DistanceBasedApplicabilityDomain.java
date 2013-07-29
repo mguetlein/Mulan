@@ -4,11 +4,18 @@ import weka.core.Instance;
 
 public interface DistanceBasedApplicabilityDomain extends ApplicabilityDomain
 {
+	public static enum Method
+	{
+		median, mean
+	}
+
 	DistanceBasedApplicabilityDomain copy();
 
 	double[] getTrainingDistances();
 
-	double getMedianDistance();
+	double getAverageTrainingDistance();
+
+	double getMaxTrainingDistance();
 
 	double getApplicabilityDomainDistance();
 
@@ -19,4 +26,12 @@ public interface DistanceBasedApplicabilityDomain extends ApplicabilityDomain
 	double getDistance(Instance i);
 
 	double getApplicabilityDomainPropability(Double distance);
+
+	public void setMethod(Method method);
+
+	public void setDistanceMultiplier(double distance);
+
+	public void setContinous(boolean continous);
+
+	public void setContinousFullDistanceMultiplier(double continousFullDistanceMultiplier);
 }
