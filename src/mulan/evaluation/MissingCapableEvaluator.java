@@ -307,12 +307,12 @@ public class MissingCapableEvaluator extends Evaluator
 				Arrays.fill(appDomainProb, 1.0);
 
 			boolean[] insideAppDomain = new boolean[output.getBipartition().length];
-			//			double[] confInclAppDomain = new double[output.getBipartition().length];
+			double[] confInclAppDomain = new double[output.getBipartition().length];
 			for (int l = 0; l < trueLabels.length; l++)
 			{
 				insideAppDomain[l] = appDomainProb[l] > 0;
-				//				confInclAppDomain[l] = updateConf(output.getBipartition()[l], output.getConfidences()[l],
-				//						appDomainProb[l]);
+				confInclAppDomain[l] = updateConf(output.getBipartition()[l], output.getConfidences()[l],
+						appDomainProb[l]);
 			}
 
 			if (tracker != null)
@@ -320,10 +320,10 @@ public class MissingCapableEvaluator extends Evaluator
 					if (!isMissing[l])
 						tracker.update(globalInstanceIndex, l, trueLabels[l],
 								output.getBipartition()[l] == trueLabels[l], output.getConfidences()[l],
-								appDomainProb[l], 0.0);//confInclAppDomain[l]);
+								appDomainProb[l], confInclAppDomain[l]);
 
-			//			for (int l = 0; l < trueLabels.length; l++)
-			//				output.getConfidences()[l] = confInclAppDomain[l];
+			for (int l = 0; l < trueLabels.length; l++)
+				output.getConfidences()[l] = confInclAppDomain[l];
 
 			for (int l = 0; l < trueLabels.length; l++)
 				if (!isMissing[l])
