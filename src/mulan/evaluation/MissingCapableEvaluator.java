@@ -25,7 +25,6 @@ import mulan.evaluation.measure.MacroPrecision;
 import mulan.evaluation.measure.MacroRecall;
 import mulan.evaluation.measure.MacroSpecificity;
 import mulan.evaluation.measure.Measure;
-import mulan.evaluation.measure.MicroAUC;
 import mulan.evaluation.measure.MicroAccuracy;
 import mulan.evaluation.measure.MicroFMeasure;
 import mulan.evaluation.measure.MicroMCC;
@@ -187,7 +186,7 @@ public class MissingCapableEvaluator extends Evaluator
 					measures.add(new MacroFMeasure(confLevel, numOfLabels, false));
 					measures.add(new MacroFMeasure(confLevel, numOfLabels, true));
 
-					measures.add(new MicroAUC(confLevel, numOfLabels));
+					//measures.add(new MicroAUC(confLevel, numOfLabels));
 					measures.add(new MacroAUC(confLevel, numOfLabels, false));
 					measures.add(new MacroAUC(confLevel, numOfLabels, true));
 
