@@ -9,7 +9,7 @@ public interface MLCApplicabilityDomain extends Serializable
 {
 	void init(MultiLabelInstances data) throws Exception;
 
-	boolean isContinous();
+	boolean isAdjustConfidence();
 
 	boolean isInsideCompleteDataset(Instance i);
 

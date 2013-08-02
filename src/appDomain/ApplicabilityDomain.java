@@ -13,10 +13,10 @@ public interface ApplicabilityDomain extends Serializable
 
 	double getApplicabilityDomainPropability(Instance i);
 
+	boolean isAdjustConfidence();
+
 	Instances getData();
 
 	ApplicabilityDomain copy();
-
-	boolean isContinous();
 
 }

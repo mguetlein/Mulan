@@ -33,6 +33,7 @@ import mulan.evaluation.measure.MicroSpecificity;
 import mulan.evaluation.measure.SubsetAccuracy;
 import weka.core.Instance;
 import weka.core.Instances;
+import appDomain.ApplicabilityDomainUtil;
 
 @SuppressWarnings("javadoc")
 public class MissingCapableEvaluator extends Evaluator
@@ -234,28 +235,6 @@ public class MissingCapableEvaluator extends Evaluator
 		return this.evaluate(learner, data, measures);
 	}
 
-	public static double updateConf(boolean prediction, double conf, double appDomain)
-	{
-		if (appDomain == 0.0)
-			return 0.5;
-		if (appDomain == 1.0)
-			return conf;
-		double confInclAppDomain;
-		if (prediction)
-		{
-			double confN = Math.max(0, conf - 0.5) * 2.0;
-			double confInclAppDomainN = confN * appDomain;
-			confInclAppDomain = confInclAppDomainN * 0.5 + 0.5;
-		}
-		else
-		{
-			double confN = conf * 2.0;
-			double confInclAppDomainN = confN * appDomain;
-			confInclAppDomain = confInclAppDomainN * 0.5;
-		}
-		return confInclAppDomain;
-	}
-
 	@Override
 	public Evaluation evaluate(final MultiLabelLearner learner, final MultiLabelInstances data,
 			final List<Measure> measures) throws IllegalArgumentException, Exception
@@ -306,12 +285,12 @@ public class MissingCapableEvaluator extends Evaluator
 				Arrays.fill(appDomainProb, 1.0);
 
 			boolean[] insideAppDomain = new boolean[output.getBipartition().length];
-			double[] confInclAppDomain = new double[output.getBipartition().length];
+			double[] confidenceADAdjusted = new double[output.getBipartition().length];
 			for (int l = 0; l < trueLabels.length; l++)
 			{
 				insideAppDomain[l] = appDomainProb[l] > 0;
-				confInclAppDomain[l] = updateConf(output.getBipartition()[l], output.getConfidences()[l],
-						appDomainProb[l]);
+				confidenceADAdjusted[l] = ApplicabilityDomainUtil.adjustConfidence(output.getBipartition()[l],
+						output.getConfidences()[l], appDomainProb[l]);
 			}
 
 			if (tracker != null)
@@ -319,10 +298,11 @@ public class MissingCapableEvaluator extends Evaluator
 					if (!isMissing[l])
 						tracker.update(globalInstanceIndex, l, trueLabels[l],
 								output.getBipartition()[l] == trueLabels[l], output.getConfidences()[l],
-								appDomainProb[l], confInclAppDomain[l]);
+								appDomainProb[l], confidenceADAdjusted[l]);
 
-			for (int l = 0; l < trueLabels.length; l++)
-				output.getConfidences()[l] = confInclAppDomain[l];
+			if (appDomain != null && appDomain.isAdjustConfidence())
+				for (int l = 0; l < trueLabels.length; l++)
+					output.getConfidences()[l] = confidenceADAdjusted[l];
 
 			for (int l = 0; l < trueLabels.length; l++)
 				if (!isMissing[l])

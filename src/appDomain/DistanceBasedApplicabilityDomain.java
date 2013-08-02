@@ -31,7 +31,7 @@ public interface DistanceBasedApplicabilityDomain extends ApplicabilityDomain
 
 	public void setDistanceMultiplier(double distance);
 
-	public void setContinous(boolean continous);
+	public void setAdjustConfidence(boolean adjustConfidence);
 
-	public void setContinousFullDistanceMultiplier(double continousFullDistanceMultiplier);
+	public void setFullDistanceMultiplier(double fullDistanceMultiplier);
 }
