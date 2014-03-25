@@ -20,6 +20,8 @@
  */
 package mulan.evaluation;
 
+import imputation.Imputation;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,6 +78,8 @@ import appDomain.MLCApplicabilityDomain;
 public class Evaluator
 {
 
+	public static boolean VERBOSE = false;
+	
 	// seed for reproduction of cross-validation results
 	private int seed = 1;
 
@@ -347,9 +351,53 @@ public class Evaluator
 		this.appDomain = appDomain;
 	}
 
+	boolean stillRunning;
+	int fold;
+	long lastMsg;
+	int msgInterval = 30;
+	
+	String info;
+	
+	public void setInfo(String info)
+	{
+		this.info = info;
+	}
+	
 	private MultipleEvaluation innerCrossValidate(MultiLabelLearner learner, MultiLabelInstances data,
 			boolean hasMeasures, List<Measure> measures, int someFolds)
 	{
+		stillRunning = true;
+		fold = -1;
+		lastMsg = System.currentTimeMillis();
+		if (info != null)
+		{
+			Thread th = new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					while(stillRunning)
+					{
+						try
+						{
+							Thread.sleep(1000);
+						}
+						catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+						long running = (System.currentTimeMillis() - lastMsg)/1000;
+						if (running > msgInterval)
+						{
+							System.out.println("Current fold "+fold+" : "+info);
+							lastMsg = System.currentTimeMillis();
+						}
+					}
+				}
+			});
+			th.start();
+		}
+		
 		Evaluation[] evaluation = new Evaluation[someFolds];
 
 		Instances workingSet = new Instances(data.getDataSet());
@@ -359,95 +407,28 @@ public class Evaluator
 			instance.setWeight(c++);
 
 		workingSet.randomize(new Random(seed));
-		for (int i = 0; i < someFolds; i++)
+		for (fold = 0; fold < someFolds; fold++)
 		{
-			//            System.out.println("Fold " + (i + 1) + "/" + someFolds);
+			if (VERBOSE)
+			  System.out.println("Fold " + (fold + 1) + "/" + someFolds);
 			try
 			{
-				Instances train = workingSet.trainCV(someFolds, i);
+				Instances train = workingSet.trainCV(someFolds, fold);
 				for (Instance instance : train)
 					instance.setWeight(1.0);
 
-				Instances test = workingSet.testCV(someFolds, i);
+				Instances test = workingSet.testCV(someFolds, fold);
 				MultiLabelInstances mlTrain = new MultiLabelInstances(train, data.getLabelsMetaData());
 
 				if (imputationLearner != null || randomImputation != null)
 				{
-					int fillCounter = 0;
-					int nonMissing = 0;
-
-					MultiLabelLearner imputationLearnerClone = null;
-					if (imputationLearner != null)
-					{
-						imputationLearnerClone = imputationLearner.makeCopy();
-						imputationLearnerClone.build(mlTrain);
-					}
-					//					for (int j = 0; j < mlTrain.getNumLabels(); j++)
-					//					{
-					//						Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
-					//						if (mlTrain.getDataSet().numDistinctValues(label) != 2)
-					//							throw new Error("WTF");
-					//					}
-					for (int instanceIndex = 0; instanceIndex < mlTrain.getNumInstances(); instanceIndex++)
-					{
-						boolean hasMissing = false;
-						for (int j = 0; j < mlTrain.getNumLabels(); j++)
-						{
-							Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[j]);
-							//							System.err.println(i + " " + j + " " + label.index());
-
-							if (mlTrain.getDataSet().get(instanceIndex).isMissing(label))
-							{
-								hasMissing = true;
-								break;
-							}
-							else
-							{
-								//just checking
-								String val = mlTrain.getDataSet().get(i).stringValue(label);
-								if (!val.equals("1") && !val.equals("0"))
-									throw new Error("WTF : " + val);
-							}
-						}
-						if (hasMissing)
-						{
-							MultiLabelOutput prediction = null;
-							if (imputationLearner != null)
-							{
-								prediction = imputationLearnerClone.makePrediction(mlTrain.getDataSet().get(
-										instanceIndex));
-								if (prediction.getBipartition().length != mlTrain.getNumLabels())
-									throw new Error("WTF");
-							}
-							for (int labelIndex = 0; labelIndex < mlTrain.getNumLabels(); labelIndex++)
-							{
-								Attribute label = mlTrain.getDataSet().attribute(mlTrain.getLabelIndices()[labelIndex]);
-								if (mlTrain.getDataSet().get(instanceIndex).isMissing(label))
-								{
-									fillCounter++;
-									if (imputationLearner != null)
-										mlTrain.getDataSet().get(instanceIndex)
-												.setValue(label, prediction.getBipartition()[labelIndex] ? "1" : "0");
-									else if (randomImputation != null)
-										mlTrain.getDataSet().get(instanceIndex)
-												.setValue(label, randomImputation.nextBoolean() ? "1" : "0");
-									else
-										throw new Error("WTF");
-								}
-								else
-									nonMissing++;
-							}
-						}
-						else
-							nonMissing += mlTrain.getNumLabels();
-					}
-					if (fillCounter + nonMissing != mlTrain.getNumInstances() * mlTrain.getNumLabels())
-						throw new Error("WTF");
-					//					System.out.println("fill a total of " + fillCounter + " missing values in training fold with "
-					//							+ mlTrain.getNumInstances() + " instances and " + mlTrain.getNumLabels()
-					//							+ " labels (non-missing: " + nonMissing + ")");
+					if (VERBOSE)
+						System.out.println("Start imputation");
+					Imputation.apply(imputationLearner, randomImputation, mlTrain);
+					if (VERBOSE)
+						System.out.println("Imputation done");
 				}
-
+				
 				MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());
 				MultiLabelLearner clone = learner.makeCopy();
 				clone.build(mlTrain);
@@ -456,9 +437,9 @@ public class Evaluator
 					appDomain.init(mlTrain);
 
 				if (hasMeasures)
-					evaluation[i] = evaluate(clone, mlTest, measures);
+					evaluation[fold] = evaluate(clone, mlTest, measures);
 				else
-					evaluation[i] = evaluate(clone, mlTest);
+					evaluation[fold] = evaluate(clone, mlTest);
 			}
 			catch (Exception ex)
 			{
@@ -467,6 +448,7 @@ public class Evaluator
 		}
 		MultipleEvaluation me = new MultipleEvaluation(evaluation, data);
 		me.calculateStatistics();
+		stillRunning = false;
 		return me;
 	}
 }
