@@ -353,6 +353,7 @@ public class Evaluator
 
 	boolean stillRunning;
 	int fold;
+	long start;
 	long lastMsg;
 	int msgInterval = 30;
 	static Integer STATIC_ID = 0;
@@ -375,7 +376,8 @@ public class Evaluator
 		}
 		stillRunning = true;
 		fold = -1;
-		lastMsg = System.currentTimeMillis();
+		start = System.currentTimeMillis();
+		lastMsg = start;
 		if (info != null)
 		{
 			Thread th = new Thread(new Runnable()
@@ -396,7 +398,8 @@ public class Evaluator
 						long running = (System.currentTimeMillis() - lastMsg)/1000;
 						if (running > msgInterval)
 						{
-							System.out.println(id+" f:"+fold+" - "+info);
+							int minutes = (int)((System.currentTimeMillis() - start)/60000); 
+							System.out.println(id+" "+minutes+"min f:"+fold+" - "+info);
 							lastMsg = System.currentTimeMillis();
 						}
 					}
