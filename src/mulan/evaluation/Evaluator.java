@@ -355,6 +355,8 @@ public class Evaluator
 	int fold;
 	long lastMsg;
 	int msgInterval = 30;
+	static Integer STATIC_ID = 0;
+	int id;
 	
 	String info;
 	
@@ -366,6 +368,11 @@ public class Evaluator
 	private MultipleEvaluation innerCrossValidate(MultiLabelLearner learner, MultiLabelInstances data,
 			boolean hasMeasures, List<Measure> measures, int someFolds)
 	{
+		synchronized (STATIC_ID)
+		{
+			STATIC_ID++;
+			id = STATIC_ID;
+		}
 		stillRunning = true;
 		fold = -1;
 		lastMsg = System.currentTimeMillis();
@@ -389,7 +396,7 @@ public class Evaluator
 						long running = (System.currentTimeMillis() - lastMsg)/1000;
 						if (running > msgInterval)
 						{
-							System.out.println("Current fold "+fold+" : "+info);
+							System.out.println(id+" f:"+fold+" - "+info);
 							lastMsg = System.currentTimeMillis();
 						}
 					}
