@@ -259,9 +259,18 @@ public class MissingCapableEvaluator extends Evaluator
 		final Set<Measure> failed = new HashSet<Measure>();
 		final Instances testData = data.getDataSet();
 		final int numInstances = testData.numInstances();
-		int numNotMissing[] = new int[trueLabels.length];
-		int numInsideAD[] = new int[trueLabels.length];
-
+		
+		HashMap<ConfidenceLevel, int[]> numNotMissing = new HashMap<ConfidenceLevel, int[]>();
+		HashMap<ConfidenceLevel, int[]> numInsideAD = new HashMap<ConfidenceLevel, int[]>();
+		for (ConfidenceLevel conf : ConfidenceLevelProvider.LEVELS)
+		{
+			numNotMissing.put(conf, new int[trueLabels.length]);
+			numInsideAD.put(conf, new int[trueLabels.length]);
+		}
+		
+//		int numNotMissing[] = new int[trueLabels.length];
+//		int numInsideAD[] = new int[trueLabels.length];
+		
 		for (int instanceIndex = 0; instanceIndex < numInstances; instanceIndex++)
 		{
 			final Instance instance = testData.instance(instanceIndex);
@@ -304,14 +313,20 @@ public class MissingCapableEvaluator extends Evaluator
 				for (int l = 0; l < trueLabels.length; l++)
 					output.getConfidences()[l] = confidenceADAdjusted[l];
 
-			for (int l = 0; l < trueLabels.length; l++)
-				if (!isMissing[l])
-				{
-					numNotMissing[l]++;
-					if (insideAppDomain[l])
-						numInsideAD[l]++;
-				}
-
+			for (ConfidenceLevel conf : ConfidenceLevelProvider.LEVELS)
+			{
+//				numNotMissing.put(conf, new int[trueLabels.length]);
+//				numInsideAD.put(conf, new int[trueLabels.length]);
+				for (int l = 0; l < trueLabels.length; l++)
+					if (conf.isInside(output.getConfidences()[l]))
+						if (!isMissing[l])
+						{
+							numNotMissing.get(conf)[l]++;
+							if (insideAppDomain[l])
+								numInsideAD.get(conf)[l]++;
+						}
+			}
+			
 			HashMap<ConfidenceLevel, Boolean[]> bipartition = new HashMap<ConfidenceLevel, Boolean[]>();
 			HashMap<ConfidenceLevel, Boolean[]> truth = new HashMap<ConfidenceLevel, Boolean[]>();
 			HashMap<ConfidenceLevel, Double[]> confidence = new HashMap<ConfidenceLevel, Double[]>();
@@ -320,7 +335,7 @@ public class MissingCapableEvaluator extends Evaluator
 				Boolean[] b = new Boolean[trueLabels.length];
 				Boolean[] t = new Boolean[trueLabels.length];
 				Double[] c = new Double[trueLabels.length];
-				for (int i = 0; i < c.length; i++)
+				for (int i = 0; i < trueLabels.length; i++)
 				{
 					if (!isMissing[i] && insideAppDomain[i] && conf.isInside(output.getConfidences()[i]))
 					{
@@ -360,14 +375,20 @@ public class MissingCapableEvaluator extends Evaluator
 		//		System.err.println(total + " predictions of non-nil values");
 		//		System.err.println("Correct: " + correct + " " + StringUtil.formatDouble(correct / (double) total));
 
-		double[] pctInsideAD = new double[trueLabels.length];
-		for (int i = 0; i < pctInsideAD.length; i++)
-			if (numNotMissing[i] == 0)
-				pctInsideAD[i] = Double.NaN;
-			else
-				pctInsideAD[i] = numInsideAD[i] / (double) numNotMissing[i];
+		HashMap<ConfidenceLevel, double[]> pctInsideADHash = new HashMap<ConfidenceLevel, double[]>();
+		for (ConfidenceLevel c : ConfidenceLevelProvider.LEVELS)
+		{
+			pctInsideADHash.put(c, new double[trueLabels.length]);
+			double[] pctInsideAD = new double[trueLabels.length];
+			for (int i = 0; i < pctInsideAD.length; i++)
+				if (numNotMissing.get(c)[i] == 0)
+					pctInsideAD[i] = Double.NaN;
+				else 
+					pctInsideAD[i] = numInsideAD.get(c)[i] / (double) numNotMissing.get(c)[i];
+			pctInsideADHash.put(c, pctInsideAD);
+		}
 
-		return new Evaluation(measures, data, pctInsideAD);
+		return new Evaluation(measures, data, pctInsideADHash);
 	}
 
 	public void setSinglePredictionTracker(SinglePredictionTracker tracker)

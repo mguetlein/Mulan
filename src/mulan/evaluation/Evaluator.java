@@ -23,6 +23,7 @@ package mulan.evaluation;
 import imputation.Imputation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.plaf.ListUI;
+
+import mulan.classifier.InvalidDataException;
 import mulan.classifier.MultiLabelLearner;
 import mulan.classifier.MultiLabelOutput;
 import mulan.data.MultiLabelInstances;
@@ -63,6 +67,7 @@ import mulan.evaluation.measure.MicroSpecificity;
 import mulan.evaluation.measure.OneError;
 import mulan.evaluation.measure.RankingLoss;
 import mulan.evaluation.measure.SubsetAccuracy;
+import weka.classifiers.bayes.net.search.fixed.FromFile;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -366,6 +371,78 @@ public class Evaluator
 		this.info = info;
 	}
 	
+	
+	/**
+	 * returns identical object as key that can be used to synchronize
+	 */
+	private static String key(MultiLabelInstances data, int seed, Imputation.Mode imputation)
+	{
+		String k = data.hashCode()+"_seed:"+seed+"_imp:"+imputation;
+		if (!keyObjects.containsKey(k))
+			keyObjects.put(k,k);
+		return keyObjects.get(k);
+	}
+	
+	private static class CVDataCache
+	{
+		MultiLabelInstances train[];
+		MultiLabelInstances test[];
+	}
+	
+	private static HashMap<String, String> keyObjects = new HashMap<String, String>();
+	private static HashMap<String, CVDataCache> cache = new HashMap<String, CVDataCache>();
+	
+	private static MultiLabelInstances getSet(int f, boolean training, MultiLabelInstances data, int seed, int numFolds, Imputation.Mode imputation)
+	{
+		CVDataCache cvCache;
+		String k = key(data,seed, imputation); 
+		synchronized (k)
+		{
+			if (!cache.containsKey(k))
+			{
+				System.out.println("Create cross-validation data for "+data+", seed: "+seed+", imputation:"+imputation);
+				
+				cvCache = new CVDataCache();
+				cvCache.train = new MultiLabelInstances[numFolds];
+				cvCache.test = new MultiLabelInstances[numFolds];
+				
+				Instances workingSet = new Instances(data.getDataSet());
+				int c = 0;
+				for (Instance instance : workingSet)
+					instance.setWeight(c++);
+				workingSet.randomize(new Random(seed));
+				for (int fold = 0; fold < numFolds; fold++)
+				{
+					try
+					{
+						Instances train = workingSet.trainCV(numFolds, fold);
+						for (Instance instance : train)
+							instance.setWeight(1.0);
+						Instances test = workingSet.testCV(numFolds, fold);
+						MultiLabelInstances mlTrain = new MultiLabelInstances(train, data.getLabelsMetaData());
+						if (imputation != Imputation.Mode.disabled)
+							Imputation.apply(imputation, mlTrain);
+						MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());
+						
+						cvCache.train[fold] = mlTrain;
+						cvCache.test[fold] = mlTest;
+					}
+					catch (Exception ex)
+					{
+						Logger.getLogger(Evaluator.class.getName()).log(Level.SEVERE, null, ex);
+						throw new Error(ex);
+					}
+				}
+				cache.put(k, cvCache);
+			}
+			cvCache = cache.get(k);
+		}
+		if (training)
+			return cvCache.train[f];
+		else
+			return cvCache.test[f];
+	}
+	
 	private MultipleEvaluation innerCrossValidate(MultiLabelLearner learner, MultiLabelInstances data,
 			boolean hasMeasures, List<Measure> measures, int someFolds)
 	{
@@ -409,9 +486,39 @@ public class Evaluator
 		}
 		
 		Evaluation[] evaluation = new Evaluation[someFolds];
+		
+//		Imputation.Mode imp = Imputation.Mode.disabled;
+//		if (imputationLearner != null)
+//			imp = Imputation.Mode.enabled;
+//		else if (randomImputation!=null)
+//			imp = Imputation.Mode.random;
+//		
+//		for (fold = 0; fold < someFolds; fold++)
+//		{
+//			if (VERBOSE)
+//			  System.out.println("Fold " + (fold + 1) + "/" + someFolds);
+//			
+//			try
+//			{
+//				MultiLabelInstances mlTrain = getSet(fold, true, data, seed, someFolds, imp);				
+//				MultiLabelInstances mlTest = getSet(fold, false, data, seed, someFolds, imp);
+//				MultiLabelLearner clone = learner.makeCopy();
+//				clone.build(mlTrain);
+//				if (appDomain != null)
+//					appDomain.init(mlTrain);
+//				if (hasMeasures)
+//					evaluation[fold] = evaluate(clone, mlTest, measures);
+//				else
+//					evaluation[fold] = evaluate(clone, mlTest);
+//			}
+//			catch (Exception e)
+//			{
+//				Logger.getLogger(Evaluator.class.getName()).log(Level.SEVERE, null, e);
+//				throw new Error(e);
+//			}
+//		}
 
 		Instances workingSet = new Instances(data.getDataSet());
-
 		int c = 0;
 		for (Instance instance : workingSet)
 			instance.setWeight(c++);
@@ -428,7 +535,11 @@ public class Evaluator
 					instance.setWeight(1.0);
 
 				Instances test = workingSet.testCV(someFolds, fold);
+				test = new Instances(test);
 				MultiLabelInstances mlTrain = new MultiLabelInstances(train, data.getLabelsMetaData());
+
+				if (appDomain != null)
+					appDomain.init(mlTrain);
 
 				if (imputationLearner != null || randomImputation != null)
 				{
@@ -442,9 +553,6 @@ public class Evaluator
 				MultiLabelInstances mlTest = new MultiLabelInstances(test, data.getLabelsMetaData());
 				MultiLabelLearner clone = learner.makeCopy();
 				clone.build(mlTrain);
-
-				if (appDomain != null)
-					appDomain.init(mlTrain);
 
 				if (hasMeasures)
 					evaluation[fold] = evaluate(clone, mlTest, measures);

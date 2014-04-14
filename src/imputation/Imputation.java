@@ -4,11 +4,29 @@ import java.util.Random;
 
 import mulan.classifier.MultiLabelLearner;
 import mulan.classifier.MultiLabelOutput;
+import mulan.classifier.transformation.EnsembleOfClassifierChains;
 import mulan.data.MultiLabelInstances;
+import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 
 public class Imputation
 {
+	public static enum Mode
+	{
+		enabled, disabled, random
+	}
+	
+	public static void apply(Mode mode, MultiLabelInstances mlTrain)
+			throws Exception
+	{
+		if (mode==Mode.disabled)
+			throw new IllegalArgumentException();
+		if (mode == Mode.enabled)
+			apply(new EnsembleOfClassifierChains(new RandomForest(), 15, true, false), null, mlTrain);
+		if (mode==Mode.random)
+			apply(null, new Random(), mlTrain);
+	}
+	
 	public static void apply(MultiLabelLearner imputationLearner, Random randomImputation, MultiLabelInstances mlTrain)
 			throws Exception
 	{

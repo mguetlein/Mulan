@@ -21,9 +21,12 @@
 package mulan.evaluation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import mulan.data.MultiLabelInstances;
+import mulan.evaluation.measure.ConfidenceLevel;
+import mulan.evaluation.measure.ConfidenceLevelProvider;
 import mulan.evaluation.measure.MacroAverageMeasure;
 import mulan.evaluation.measure.Measure;
 
@@ -43,7 +46,7 @@ public class Evaluation
 	private MultiLabelInstances data;
 	private List<Measure> measures;
 
-	double pctInsideAD[];
+	HashMap<ConfidenceLevel, double[]> pctInsideAD;
 
 	/**
 	 * Creates a new evaluation object by deep copying the measure objects that
@@ -60,7 +63,7 @@ public class Evaluation
 		this(someMeasures, data, null);
 	}
 
-	public Evaluation(List<Measure> someMeasures, MultiLabelInstances data, double[] pctInsideAD) throws Exception
+	public Evaluation(List<Measure> someMeasures, MultiLabelInstances data, HashMap<ConfidenceLevel, double[]> pctInsideAD) throws Exception
 	{
 		measures = new ArrayList<Measure>();
 		for (Measure m : someMeasures)
@@ -137,20 +140,20 @@ public class Evaluation
 		return measures;
 	}
 
-	public double getPctInsideAD(int label)
+	public double getPctInsideAD(int label, ConfidenceLevel cfl)
 	{
-		return pctInsideAD[label];
+		return pctInsideAD.get(cfl)[label];
 	}
 
 	public double getPctInsideAD()
 	{
 		double sum = 0;
 		int count = 0;
-		for (int i = 0; i < pctInsideAD.length; i++)
+		for (int i = 0; i < pctInsideAD.get(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL).length; i++)
 		{
-			if (!Double.isNaN(pctInsideAD[i]))
+			if (!Double.isNaN(pctInsideAD.get(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL)[i]))
 			{
-				sum += pctInsideAD[i];
+				sum += pctInsideAD.get(ConfidenceLevelProvider.CONFIDENCE_LEVEL_ALL)[i];
 				count++;
 			}
 		}

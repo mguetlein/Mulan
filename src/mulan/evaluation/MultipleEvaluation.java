@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import mulan.data.MultiLabelInstances;
+import mulan.evaluation.measure.ConfidenceLevel;
 import mulan.evaluation.measure.LabelBasedBipartitionMeasureBase;
 import mulan.evaluation.measure.MacroAverageMeasure;
 import mulan.evaluation.measure.Measure;
@@ -339,8 +340,8 @@ public class MultipleEvaluation
 		return evaluations.get(experiment).getPctInsideAD();
 	}
 
-	public double getPctInsideAD(int experiment, int label)
+	public double getPctInsideAD(int experiment, int label, ConfidenceLevel lvl)
 	{
-		return evaluations.get(experiment).getPctInsideAD(label);
+		return evaluations.get(experiment).getPctInsideAD(label, lvl);
 	}
 }
