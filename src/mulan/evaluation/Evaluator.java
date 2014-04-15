@@ -37,6 +37,8 @@ import javax.swing.plaf.ListUI;
 import mulan.classifier.InvalidDataException;
 import mulan.classifier.MultiLabelLearner;
 import mulan.classifier.MultiLabelOutput;
+import mulan.data.InvalidDataFormatException;
+import mulan.data.LabelsMetaData;
 import mulan.data.MultiLabelInstances;
 import mulan.evaluation.measure.AveragePrecision;
 import mulan.evaluation.measure.Coverage;
@@ -443,6 +445,22 @@ public class Evaluator
 			return cvCache.test[f];
 	}
 	
+	public static final class IndexedMultiLabelInstances extends MultiLabelInstances
+	{
+		int[] indices;
+		
+		public IndexedMultiLabelInstances(Instances instances, LabelsMetaData labelMetaData, int[] indices) throws InvalidDataFormatException
+		{
+			super(instances,labelMetaData);
+			this.indices = indices;
+		}
+		
+		public int[] getIndices()
+		{
+			return indices;
+		}
+	}
+	
 	private MultipleEvaluation innerCrossValidate(MultiLabelLearner learner, MultiLabelInstances data,
 			boolean hasMeasures, List<Measure> measures, int someFolds)
 	{
@@ -531,12 +549,17 @@ public class Evaluator
 			try
 			{
 				Instances train = workingSet.trainCV(someFolds, fold);
+				int trainOrigIndicies[] = new int[train.size()];
+				int trainIdx = 0;
 				for (Instance instance : train)
+				{
+					trainOrigIndicies[trainIdx++] = (int)instance.weight();
 					instance.setWeight(1.0);
-
+				}
+				
 				Instances test = workingSet.testCV(someFolds, fold);
 				test = new Instances(test);
-				MultiLabelInstances mlTrain = new MultiLabelInstances(train, data.getLabelsMetaData());
+				MultiLabelInstances mlTrain = new IndexedMultiLabelInstances(train, data.getLabelsMetaData(), trainOrigIndicies);
 
 				if (appDomain != null)
 					appDomain.init(mlTrain);
